@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light" />
+<title>Avensar Signal — What data, from where, and what it costs</title>
+<style>
+  :root{
+    --bg:#FAF9F5; --surface:#FFFFFF; --surface-2:#F3F0E8; --surface-3:#EAE5D9;
+    --border:#E4DFD3; --border-strong:#8C8678;
+    --text:#1F1E1B; --text-2:#55514A; --text-muted:#6B665C;
+    --accent:#DA7756; --accent-strong:#C15F3C; --accent-text:#A8482A; --accent-hover:#B9532F; --accent-soft:#FBEAE3;
+    --ok:#1E7B55; --ok-bg:#E6F3EC; --info:#1F6FB5; --info-bg:#E8F1FA;
+    --warn:#8A5A00; --warn-bg:#FFF3D6; --danger:#B3261E; --danger-bg:#FBE9E7;
+    --embargo:#5B2A86; --embargo-bg:#F1E8F8;
+    --font:Inter,"Segoe UI",system-ui,-apple-system,"Noto Sans Devanagari","Nirmala UI","Noto Sans",Roboto,sans-serif;
+    --serif:"Iowan Old Style","Palatino Linotype",Charter,Georgia,"Noto Serif Devanagari","Nirmala UI",serif;
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+    --r:14px; --r-sm:9px;
+    --sh1:0 1px 2px rgba(31,30,27,.05),0 1px 1px rgba(31,30,27,.03);
+    --sh2:0 8px 24px -8px rgba(31,30,27,.14),0 2px 6px rgba(31,30,27,.05);
+    --nav-w:272px; --top-h:58px;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,p{margin:0}
+  a{color:var(--accent-text);text-underline-offset:2px}
+  a:hover{color:var(--accent-hover)}
+  :focus-visible{outline:2px solid var(--info);outline-offset:2px;border-radius:6px}
+  .mono{font-family:var(--mono);font-size:.85em}
+  .num{font-variant-numeric:tabular-nums}
+  .muted{color:var(--text-muted)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  .topbar{position:fixed;top:0;left:0;right:0;height:var(--top-h);z-index:50;display:flex;align-items:center;gap:12px;padding:0 24px;background:rgba(250,249,245,.94);backdrop-filter:saturate(1.1) blur(8px);border-bottom:1px solid var(--border)}
+  .wordmark{display:flex;align-items:baseline;gap:8px;font-weight:650;font-size:16px;letter-spacing:-.01em;white-space:nowrap}
+  .wordmark .nd{color:var(--accent-text)}
+  .wordmark .dev{font-family:var(--serif);color:var(--text-muted);font-weight:400}
+  .avensar-chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--ink);color:#F3F0E8;font-size:9.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+  .avensar-chip i{width:5px;height:5px;border-radius:50%;background:var(--accent);display:inline-block}
+  .top-chip{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);font-size:11px;font-weight:700;white-space:nowrap}
+  .topbar .spacer{flex:1}
+  .print-btn{height:30px;padding:0 12px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);border-radius:8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+  .print-btn:hover{background:var(--surface-2);color:var(--text)}
+  .readbar{position:fixed;top:var(--top-h);left:0;right:0;height:3px;z-index:51}
+  .readbar span{display:block;height:100%;width:0;background:var(--accent)}
+
+  .layout{display:grid;grid-template-columns:var(--nav-w) 1fr;max-width:1340px;margin:0 auto;padding-top:var(--top-h)}
+  .sidebar{position:sticky;top:calc(var(--top-h) + 3px);align-self:start;height:calc(100vh - var(--top-h) - 3px);overflow-y:auto;padding:24px 14px 48px;border-right:1px solid var(--border)}
+  .sidebar .toc-label{font-size:10.5px;font-weight:750;letter-spacing:.13em;text-transform:uppercase;color:var(--text-muted);margin:0 0 12px 8px}
+  .toc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+  .toc a{display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:8px;color:var(--text-2);text-decoration:none;font-size:12.5px;line-height:1.35;border:1px solid transparent}
+  .toc a .g{font-family:var(--mono);font-size:10px;color:var(--text-muted);min-width:18px;text-align:right}
+  .toc a:hover{background:var(--surface-2);color:var(--text)}
+  .toc a.active{background:var(--accent-soft);border-color:#F3CFC0;color:var(--accent-text);font-weight:650}
+  .toc a.head{font-weight:650;color:var(--text);margin-top:9px}
+  .toc a.head .g{color:var(--accent-text)}
+  .toc .divider{height:1px;background:var(--border);margin:8px 9px}
+
+  main{padding:34px 48px 72px;min-width:0}
+  .wrap{max-width:960px}
+  section{scroll-margin-top:calc(var(--top-h) + 18px)}
+
+  .hero{padding:14px 0 20px;border-bottom:1px solid var(--border)}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:750;letter-spacing:.10em;text-transform:uppercase;color:var(--accent-text);margin-bottom:16px}
+  .eyebrow::before{content:"";width:24px;height:2px;background:var(--accent);border-radius:2px}
+  .hero h1{font-size:44px;line-height:1.04;font-weight:650;letter-spacing:-.028em;margin-bottom:14px;max-width:860px}
+  .hero h1 .accent{color:var(--accent-text)}
+  .lede{font-family:var(--serif);font-size:20px;line-height:1.55;color:var(--text-2);max-width:760px;margin-bottom:18px}
+  .hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid var(--border);background:var(--surface);color:var(--text-2);white-space:nowrap}
+  .chip.ok{background:var(--ok-bg);border-color:#CBE5D6;color:var(--ok)}
+  .chip.warn{background:var(--warn-bg);border-color:#F0DEAC;color:var(--warn)}
+  .chip.danger{background:var(--danger-bg);border-color:#F2CCC8;color:var(--danger)}
+  .chip.accent{background:var(--accent-soft);border-color:#F3CFC0;color:var(--accent-text)}
+  .meta-line{font-size:12px;color:var(--text-muted);display:flex;flex-wrap:wrap;gap:14px}
+  .meta-line b{color:var(--text-2);font-weight:600}
+
+  .block{margin-top:46px}
+  .block h2{font-size:27px;font-weight:650;letter-spacing:-.018em;margin-bottom:6px}
+  .block h2 .kicker{display:block;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--accent-text);margin-bottom:7px;text-transform:uppercase}
+  .block h3{font-size:18px;font-weight:650;margin:28px 0 8px;letter-spacing:-.01em}
+  .block h4{font-size:14.5px;font-weight:650;margin:20px 0 6px}
+  .block p{margin-bottom:12px;color:var(--text-2)}
+  .block p strong,.block li strong{color:var(--text);font-weight:650}
+  .block ul,.block ol{margin:0 0 16px;padding-left:22px}
+  .block li{margin-bottom:7px;color:var(--text-2)}
+  .block li::marker{color:var(--accent-text)}
+  .small{font-size:13.5px;line-height:1.55}
+  .tiny{font-size:12px;line-height:1.5;color:var(--text-muted)}
+
+  .callout{border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;background:var(--surface);box-shadow:var(--sh1);margin:18px 0}
+  .callout .label{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+  .callout p:last-child{margin-bottom:0}
+  .callout.key{background:#FFFCF8;border-color:#EDD6C8}
+  .callout.key .label{color:var(--accent-text)}
+  .callout.warn{background:var(--warn-bg);border-color:#EAD7A6}
+  .callout.warn .label{color:var(--warn)}
+  .callout.legal{background:#F7F4FB;border-color:#DED1EC}
+  .callout.legal .label{color:var(--embargo)}
+  .callout.honest{background:#F3F7F4;border-color:#CFE2D6}
+  .callout.honest .label{color:var(--ok)}
+  .callout.danger{background:var(--danger-bg);border-color:#F2CCC8}
+  .callout.danger .label{color:var(--danger)}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 15px;box-shadow:var(--sh1)}
+  .kpi .n{font-family:var(--serif);font-size:25px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:3px}
+  .kpi .l{font-size:10px;font-weight:750;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+  .kpi .s{font-size:11.5px;color:var(--text-2);margin-top:4px;line-height:1.4}
+
+  .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);box-shadow:var(--sh1);margin:14px 0 18px}
+  table{border-collapse:collapse;width:100%;min-width:680px;font-size:12.5px;line-height:1.45}
+  th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--border)}
+  th{background:var(--surface-2);font-size:9.5px;font-weight:800;letter-spacing:.055em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#FCFBF8}
+  td .sub{display:block;font-size:10.5px;color:var(--text-muted);margin-top:2px}
+  .nowrap{white-space:nowrap}
+
+  .badge{display:inline-flex;align-items:center;height:19px;padding:0 6px;border-radius:5px;font-size:9px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;border:1px solid transparent;white-space:nowrap}
+  .badge.p0{background:var(--ok-bg);color:var(--ok);border-color:#CBE5D6}
+  .badge.p1{background:var(--accent-soft);color:var(--accent-text);border-color:#F3CFC0}
+  .badge.p2{background:var(--surface-2);color:var(--text-2);border-color:var(--border)}
+  .badge.free{background:var(--ok-bg);color:var(--ok);border-color:#CBE5D6}
+  .badge.cheap{background:var(--info-bg);color:var(--info);border-color:#C9DFF2}
+  .badge.paid{background:var(--accent-soft);color:var(--accent-text);border-color:#F3CFC0}
+  .badge.gated{background:var(--danger-bg);color:var(--danger);border-color:#F2CCC8}
+  .badge.research{background:var(--embargo-bg);color:var(--embargo);border-color:#DED1EC}
+
+  .tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+  .tier{border:1px solid var(--border);border-radius:var(--r);background:var(--surface);padding:17px;box-shadow:var(--sh1);display:flex;flex-direction:column}
+  .tier.recommended{border-color:#E2B9A6;background:#FFFCF8;box-shadow:var(--sh2)}
+  .tier .tlabel{font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+  .tier h3{font-size:18px;margin:4px 0 2px}
+  .tier .price{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.02em;margin:2px 0 3px}
+  .tier .price span{font-size:11px;color:var(--text-muted);font-weight:500;font-family:var(--font)}
+  .tier p{font-size:12px;line-height:1.5;margin:6px 0 10px;color:var(--text-2)}
+  .tier ul{padding-left:17px;margin:0 0 10px}
+  .tier li{font-size:11.8px;margin-bottom:5px;line-height:1.45;color:var(--text-2)}
+  .tier .for{font-size:10.5px;color:var(--text-muted);margin-top:auto;border-top:1px solid var(--border);padding-top:8px}
+  .pill-rec{display:inline-flex;height:19px;align-items:center;padding:0 7px;border-radius:5px;background:var(--accent-soft);color:var(--accent-text);font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px}
+
+  .calc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh1);margin:16px 0}
+  .preset-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .preset{height:29px;padding:0 10px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);border-radius:7px;font:inherit;font-size:11px;font-weight:650;cursor:pointer}
+  .preset:hover{background:var(--surface-2);color:var(--text)}
+  .preset.active{background:var(--accent-soft);border-color:#F3CFC0;color:var(--accent-text)}
+  .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .calc-field{margin-bottom:13px}
+  .calc-field label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11.5px;font-weight:650;color:var(--text-2);margin-bottom:5px}
+  .calc-field label output{font-family:var(--mono);font-size:10.5px;color:var(--accent-text);font-weight:600}
+  .calc-field input[type=range]{width:100%;accent-color:var(--accent-strong);height:20px}
+  .calc-field select{width:100%;height:33px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;font-size:12px;padding:0 9px}
+  .calc-result{background:#1F1E1B;color:#F3F0E8;border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:center}
+  .calc-result .rl{font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#A9A294;margin-bottom:4px}
+  .calc-result .big{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.05;color:#fff}
+  .calc-result .big span{font-size:12px;color:#C9C2B3;font-weight:500;letter-spacing:0;font-family:var(--font)}
+  .calc-result .inr{font-size:12.5px;color:#D8D2C4;margin:3px 0 12px}
+  .calc-result .split{border-top:1px solid #3A3731;padding-top:10px;margin-top:2px}
+  .calc-result .row{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:#C9C2B3;margin-bottom:5px}
+  .calc-result .row b{color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+  .calc-result .warnline{font-size:10.5px;color:#F0C36A;line-height:1.4;margin-top:8px;border-top:1px solid #3A3731;padding-top:8px}
+  .calc-note{font-size:10.5px;color:var(--text-muted);margin-top:10px;line-height:1.45}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .mini-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 16px;box-shadow:var(--sh1)}
+  .mini-card h4{margin:0 0 6px;font-size:13.5px}
+  .mini-card p{font-size:12.5px;margin-bottom:8px}
+  .mini-card ul{padding-left:17px;margin:0}
+  .mini-card li{font-size:12px;margin-bottom:4px}
+
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+  .flow .step{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 13px;position:relative;box-shadow:var(--sh1)}
+  .flow .step .n{font-family:var(--mono);font-size:9.5px;color:var(--accent-text);font-weight:700;margin-bottom:4px}
+  .flow .step b{display:block;font-size:12px;margin-bottom:3px}
+  .flow .step span{font-size:10.5px;line-height:1.45;color:var(--text-muted);display:block}
+  .flow .step::after{content:"→";position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:var(--border-strong);font-size:13px;z-index:1}
+  .flow .step:last-child::after{display:none}
+
+  .footnotes{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);line-height:1.5}
+  .footnotes ol{padding-left:18px;margin:4px 0 0}
+  .footnotes li{margin-bottom:5px}
+
+  .sources{display:flex;flex-direction:column;gap:7px;margin:12px 0}
+  .sources a{font-size:12px;line-height:1.45;display:block;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);text-decoration:none}
+  .sources a:hover{background:var(--surface-2)}
+  .sources a b{display:block;color:var(--text);font-size:11.5px}
+  .sources a span{color:var(--text-muted);font-size:10.5px}
+
+  .footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);line-height:1.6}
+  .footer b{color:var(--text-2)}
+  .footer-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .footer-brand .fmark{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;font-size:11px;font-weight:800}
+  .footer-brand .fname{font-size:14px;font-weight:700;color:var(--ink);line-height:1.2}
+  .footer-brand .fname span{display:block;font-size:9px;font-weight:700;color:var(--accent-text);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+  .proprietary{margin:10px 0 8px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:10.5px;line-height:1.5;color:var(--text-2)}
+  .proprietary b{color:var(--ink)}
+
+  @media (max-width:1100px){
+    .layout{grid-template-columns:1fr}
+    .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:16px 20px 14px}
+    .sidebar .toc-label{display:none}
+    .toc{flex-direction:row;flex-wrap:wrap;gap:3px}
+    .toc a{padding:5px 8px;font-size:11.5px}
+    .toc a .g{display:none}
+    .toc a.head{margin-top:0}
+    .toc .divider{display:none}
+    main{padding:24px 24px 56px}
+    .wrap{max-width:none}
+  }
+  @media (max-width:820px){
+    .hero h1{font-size:34px}
+    .lede{font-size:18px}
+    .kpi-grid{grid-template-columns:1fr 1fr}
+    .tier-grid{grid-template-columns:1fr}
+    .flow{grid-template-columns:1fr 1fr}
+    .flow .step:nth-child(2)::after{display:none}
+    .calc-grid,.grid-2{grid-template-columns:1fr}
+    .avensar-chip{display:none}
+  }
+  @media (max-width:560px){
+    .topbar{padding:0 14px;gap:8px}
+    .wordmark .dev{display:none}
+    .print-btn{display:none}
+    main{padding:18px 16px 44px}
+    .hero h1{font-size:30px}
+    .kpi-grid{grid-template-columns:1fr}
+    .flow{grid-template-columns:1fr}
+    .flow .step::after{display:none}
+    .calc{padding:14px}
+  }
+  @media print{
+    .topbar,.readbar,.sidebar,.print-btn,.preset-row{display:none!important}
+    .layout{display:block;padding-top:0}
+    main{padding:0;max-width:none}
+    .wrap{max-width:none}
+    body{font-size:10.5pt;background:#fff}
+    .block{break-inside:avoid-page}
+    .table-wrap{overflow:visible;box-shadow:none}
+    table{min-width:0;font-size:8.5pt}
+    .callout,.kpi,.tier,.mini-card,.calc{box-shadow:none}
+    a{color:inherit;text-decoration:none}
+    .hero h1{font-size:26pt}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark"><span class="nd">Avensar Signal</span><span class="dev">data &amp; cost plan</span></div>
+  <span class="avensar-chip"><i></i>An Avensar product</span>
+  <span class="top-chip">As of 7 Nov 2026 · X section re-checked</span>
+  <div class="spacer"></div>
+  <button class="print-btn" onclick="window.print()">Print / PDF</button>
+</div>
+<div class="readbar"><span id="readbar"></span></div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <p class="toc-label">Contents</p>
+    <nav class="toc" id="toc">
+      <a href="#answer" class="head"><span class="g">00</span> The answer in 60 seconds</a>
+      <a href="#needs"><span class="g">01</span> What data the dashboard needs</a>
+      <a href="#sources"><span class="g">02</span> Where each dataset comes from</a>
+      <a href="#x-legal"><span class="g">2b</span> X / Twitter: the legal route</a>
+      <a href="#tiers"><span class="g">03</span> The three cost tiers</a>
+      <a href="#calculator"><span class="g">04</span> Cost calculator</a>
+      <a href="#one-time"><span class="g">05</span> One-time costs</a>
+      <a href="#depth"><span class="g">06</span> What dashboard-design depth adds</a>
+      <a href="#limits"><span class="g">07</span> What we cannot get</a>
+      <a href="#research"><span class="g">08</span> Latest research corrections</a>
+      <a href="#plan"><span class="g">09</span> Recommended plan</a>
+      <a href="#checklist"><span class="g">10</span> What we need from you</a>
+      <a href="#links"><span class="g">11</span> Sources</a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="wrap">
+
+      <header class="hero">
+        <div class="eyebrow">Data requirements &amp; cost plan · Avensar Signal</div>
+        <h1>What data.<br><span class="accent">From where. At what cost.</span></h1>
+        <p class="lede">A plain-English map of every dataset the dashboard needs, the legal route to each one, and what it costs at three sizes. Based on the product specs, the current CJP capture, and platform rules checked on 5 November 2026.</p>
+        <div class="hero-chips">
+          <span class="chip accent">9 languages + Hinglish</span>
+          <span class="chip">15+ sources</span>
+          <span class="chip ok">₹27k–1.6L / month</span>
+          <span class="chip warn">Some sources gated / risky</span>
+          <span class="chip danger">WhatsApp impossible</span>
+        </div>
+        <div class="meta-line">
+          <span><b>Built from:</b> product explainer · MVP/13 · MVP/16 · CJP social capture</span>
+          <span><b>FX:</b> ₹88 / USD (assumption)</span>
+        </div>
+      </header>
+
+      <!-- 00 -->
+      <section class="block" id="answer">
+        <h2><span class="kicker">00 · The short version</span>One screen, three answers</h2>
+        <p>The dashboard needs <strong>three kinds of data</strong>: the conversation (posts, comments, videos), the record (news, election data, fact-checks), and the context (ads, search trends, surveys). Most of the cost is in the first one. Most of the credibility is in the second.</p>
+
+        <div class="kpi-grid">
+          <div class="kpi"><div class="n">15k / day</div><div class="l">Tier S · lean demo</div><div class="s">≈ ₹27–32k / month all-in</div></div>
+          <div class="kpi"><div class="n">50k / day</div><div class="l">Tier M · pilot</div><div class="s">≈ ₹55–70k / month all-in</div></div>
+          <div class="kpi"><div class="n">200k / day</div><div class="l">Tier L · campaign</div><div class="s">≈ ₹1.3–1.6L / month, billed to client</div></div>
+          <div class="kpi"><div class="n">₹0.5–1.5L</div><div class="l">One-time accuracy</div><div class="s">gold-set annotation, before any accuracy claim</div></div>
+        </div>
+
+        <div class="callout key">
+          <div class="label">The three-sentence answer</div>
+          <p><strong>What:</strong> post-level X data, a small IG/FB watchlist, YouTube comments, RSS/news, election/map data, and optional Telegram, Threads, Reddit, ads and trends.</p>
+          <p><strong>Where:</strong> X via the <strong>official API only</strong> ($5/1k posts, licensed; resellers are unlicensed and not recommended — see §2b); Instagram via the official Business Discovery API plus a small Apify watchlist; YouTube and news free; Facebook only via watchlist or research access; WhatsApp nowhere.</p>
+          <p><strong>Cost:</strong> roughly <strong>₹27–32k/month</strong> for a lean demo, <strong>₹55–70k/month</strong> for the default pilot, <strong>₹1.3–1.6L/month</strong> for a campaign — plus ₹1–2.5L one-time for annotation and legal.</p>
+        </div>
+
+        <div class="callout warn">
+          <div class="label">The number that changes everything</div>
+          <p>The only fully legal X route is the official API: <strong>$5 per 1,000 posts</strong>. 1.2 million posts/month is about <strong>$6,000</strong>, not the $180 a reseller quotes. The cheapest legal way to run is to read far fewer posts: use X's <strong>Counts</strong> endpoint for volume and share-of-voice, and read only a targeted sample (100k posts ≈ <strong>$500 ≈ ₹44k</strong>). Separately, X's pay-per-use licence is meant for prototypes and limited apps; a multi-client product needs X's written approval or an Enterprise plan. Details in <a href="#x-legal">§2b</a>.</p>
+        </div>
+      </section>
+
+      <!-- 01 -->
+      <section class="block" id="needs">
+        <h2><span class="kicker">01 · The inventory</span>What data the dashboard actually needs</h2>
+        <p>The product explainer describes 16 features and 20 dashboard pages. Strip away the presentation and they need six data layers. Each layer has a different source, cost and confidence.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Layer</th><th>What it contains</th><th>Feeds which pages</th><th>How often</th><th>Who can supply it</th></tr></thead>
+            <tbody>
+              <tr><td><b>1. Conversation</b></td><td>Posts, captions, comments, videos, Telegram messages, public metrics</td><td>Overview, Live Radar, Topic Explorer, Word Lab, Entities, Narratives, Lens, Media</td><td>Every 5–30 min</td><td>X, Instagram, Facebook, YouTube, Telegram, Threads, Reddit</td></tr>
+              <tr><td><b>2. Record</b></td><td>News articles, election results, candidate affidavits, maps, court/ECI documents</td><td>Overview, Areas, Issues, Media, Reports, Ground Truth</td><td>Hourly / daily</td><td>GDELT, RSS, NewsAPI, ECI, Lokdhaba, DataMeet, MyNeta</td></tr>
+              <tr><td><b>3. Verification</b></td><td>Fact-checks, claim verdicts, corrections</td><td>Narratives, Alerts, Reports, Review</td><td>Daily</td><td>Alt News, Boom, Factly, Newslaundry, PIB Fact Check, Google Fact Check</td></tr>
+              <tr><td><b>4. Paid context</b></td><td>Political/issue ads, creative, spend/reach where available</td><td>Media, Reports, Alerts</td><td>Daily</td><td>Meta Ad Library API, Google Ads Transparency, X Ads</td></tr>
+              <tr><td><b>5. Demand signal</b></td><td>Search interest, Wikipedia pageviews, app reviews</td><td>Overview, Topic Explorer, Reports</td><td>Daily</td><td>Google Trends (alpha/SerpApi), Wikimedia API, app APIs</td></tr>
+              <tr><td><b>6. Ground truth</b></td><td>Surveys, field reports, client CSV</td><td>Ground Truth, Reports, Areas</td><td>Per study</td><td>Client survey, field partner</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The minimum post-level fields</h3>
+        <p>Every conversation record should land in one common shape. Without these fields, the dashboard cannot compute share of voice, sentiment, language mix or coordination.</p>
+        <div class="grid-2">
+          <div class="mini-card">
+            <h4>Required</h4>
+            <ul>
+              <li><b>Platform + external post ID</b> — dedupe key</li>
+              <li><b>Account + author hash</b> — entity map, never a person label</li>
+              <li><b>Timestamp</b> — trend, velocity, timezone</li>
+              <li><b>Text / caption / title</b> — the corpus</li>
+              <li><b>Language</b> — detected, with a confidence</li>
+              <li><b>Public metrics</b> — likes, comments, views, reposts where exposed</li>
+              <li><b>URL</b> — evidence link</li>
+              <li><b>Source + capture time</b> — provenance and retention</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <h4>Useful, not always available</h4>
+            <ul>
+              <li>Geo tag or profile location</li>
+              <li>Media type (image/video/reel)</li>
+              <li>Parent post / reply / quote</li>
+              <li>Mentions and hashtags</li>
+              <li>Comment text (owned accounts or vendor only)</li>
+              <li>Reach, impressions, saves (platform-only)</li>
+              <li>Demographics (platform-only)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout honest">
+          <div class="label">The derived layer</div>
+          <p>Sentiment, stance, emotion, sarcasm, narratives, coordination and quality badges are <strong>not data sources</strong>. They are computed from the text by models plus a human-labelled gold set. Budget for one LLM call per post/cluster and ₹0.5–1.5 lakh for annotation.</p>
+        </div>
+      </section>
+
+      <!-- 02 -->
+      <section class="block" id="sources">
+        <h2><span class="kicker">02 · The source map</span>Where each dataset comes from</h2>
+        <p>This is the operational table. Prices are per 1,000 records unless stated. “Tier M” is the default 50k-posts/day pilot. The right-hand column is the catch: every cheap source has a limit or a legal gate.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Source</th><th>Priority</th><th>Access route</th><th>$/1k records</th><th>At Tier M</th><th>Key limit / risk</th></tr></thead>
+            <tbody>
+              <tr><td><b>X official</b><span class="sub">the only legal route</span></td><td><span class="badge p0">P0</span></td><td>X API v2 pay-per-use (then Enterprise)</td><td class="num">$5.00</td><td class="num">100k → ~$500<br>1.2M → ~$6,000</td><td>3M reads/month cap. Pay-per-use licence is for prototypes / limited apps; scale or multi-client resale needs X approval / Enterprise. See §2b.</td></tr>
+              <tr><td><b>X via reseller</b><span class="sub">not recommended</span></td><td><span class="badge gated">Avoid</span></td><td>twitterapi.io / SocialData</td><td class="num">$0.15–0.20</td><td class="num">1.2M → ~$180–240</td><td>Not licensed by X (twitterapi.io says it is "not affiliated with, endorsed by, or sponsored by X Corp"). Cheap, but a commercial product built on it has no licence to stand on.</td></tr>
+              <tr><td><b>YouTube</b><span class="sub">speeches + comments</span></td><td><span class="badge p0">P0</span></td><td>Official Data API v3</td><td class="num">$0</td><td class="num">free quota</td><td>10k units/day; search 100 calls/day; raw text max 30 days.</td></tr>
+              <tr><td><b>News RSS + GDELT</b><span class="sub">the record</span></td><td><span class="badge p0">P0</span></td><td>Own crawler / GDELT API</td><td class="num">$0</td><td class="num">free</td><td>~100 items/feed; redirect links; not a full-text archive.</td></tr>
+              <tr><td><b>Election / map data</b></td><td><span class="badge p0">P0</span></td><td>Lokdhaba, ECI, DataMeet, MyNeta</td><td class="num">$0</td><td class="num">free</td><td>Reuse licences vary; attribute sources.</td></tr>
+              <tr><td><b>Instagram</b><span class="sub">official public route</span></td><td><span class="badge p1">P1</span></td><td>Business Discovery API</td><td class="num">$0</td><td class="num">free</td><td>Professional accounts only; recent media; captions + counts; no comments text or history.</td></tr>
+              <tr><td><b>Instagram</b><span class="sub">watchlist</span></td><td><span class="badge p1">P1</span></td><td>Apify first-party actor</td><td class="num">$1.50–2.70</td><td class="num">25k → ~$38–68</td><td>Watchlist only; Meta ToS; actor breaks; no firehose.</td></tr>
+              <tr><td><b>Facebook</b><span class="sub">watchlist</span></td><td><span class="badge p1">P1</span></td><td>Apify first-party actor</td><td class="num">$2.00–5.00</td><td class="num">25k → ~$50–125</td><td>Pages only; no groups; ToS risk; no public official API.</td></tr>
+              <tr><td><b>Telegram</b><span class="sub">public channels</span></td><td><span class="badge p1">P1</span></td><td>MTProto / Telethon</td><td class="num">$0</td><td class="num">free</td><td>Feb-2026 ToS bans scraping; counsel sign-off required; default OFF.</td></tr>
+              <tr><td><b>Threads</b><span class="sub">Gen-Z signal</span></td><td><span class="badge p1">P1</span></td><td>Official keyword search</td><td class="num">$0</td><td class="num">free</td><td>2,200 queries/24h; sensitive political terms may return empty.</td></tr>
+              <tr><td><b>Reddit</b></td><td><span class="badge p2">P2</span></td><td>Official Data API</td><td class="num">~$0.24</td><td class="num">~$7 for 30k</td><td>Commercial contract; free tier 100 QPM non-commercial.</td></tr>
+              <tr><td><b>Meta Ad Library</b></td><td><span class="badge p1">P1</span></td><td>Official API</td><td class="num">$0</td><td class="num">free</td><td>Identity verification; political/issue ads; spend detail varies by country.</td></tr>
+              <tr><td><b>NewsAPI</b><span class="sub">optional</span></td><td><span class="badge p1">P1</span></td><td>Paid API key</td><td class="num">—</td><td class="num">$449/mo</td><td>Free tier is development-only. RSS + GDELT may be enough.</td></tr>
+              <tr><td><b>Google Trends</b></td><td><span class="badge p2">P2</span></td><td>Official alpha / SerpApi</td><td class="num">varies</td><td class="num">low</td><td>Official API is application-based alpha; `pytrends` is unmaintained.</td></tr>
+              <tr><td><b>ASR / vernacular video</b></td><td><span class="badge p2">P2</span></td><td>Sarvam Saaras / Whisper</td><td class="num">₹30 / audio hour</td><td class="num">Phase 2</td><td>Accuracy unbenchmarked; media rights; client-supplied files only.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn">
+          <div class="label">The one row to argue about</div>
+          <p><strong>X via reseller</strong> is 25–30x cheaper than official X, but it is unlicensed and can break or be cut off without notice. For a commercial product sold to political clients, the 2026 recommendation is to <strong>drop the reseller as the production route</strong> (D3 → default to official). The reseller can stay as a throw-away tool for internal UI testing only, never for client-facing numbers.</p>
+        </div>
+
+        <h3>The flow</h3>
+        <div class="flow">
+          <div class="step"><div class="n">01</div><b>Collect</b><span>APIs, resellers, RSS, watchlists, manual capture</span></div>
+          <div class="step"><div class="n">02</div><b>Normalise</b><span>One schema, dedupe, language ID, entity map</span></div>
+          <div class="step"><div class="n">03</div><b>Enrich</b><span>Stance, emotion, narratives, coordination, quality</span></div>
+          <div class="step"><div class="n">04</div><b>Publish</b><span>Dashboard, alerts, briefs, evidence links</span></div>
+        </div>
+      </section>
+
+      <!-- 2b: X legal route -->
+      <section class="block" id="x-legal">
+        <h2><span class="kicker">02b · X / Twitter</span>Every route to X data, and which are legal</h2>
+        <p>Checked 7 Nov 2026 against docs.x.com and vendor pages. Prices are public list prices in USD; enterprise vendors do not publish rates.</p>
+
+        <div class="callout warn">
+          <div class="label">Bottom line</div>
+          <p><strong>Cheapest fully legal route:</strong> X's official pay-per-use API, at $0.005 per post read, with the <em>Counts</em> endpoint ($0.005 per request) for volume and a small targeted sample for content. <strong>Cheapest route that is safe to resell to clients:</strong> a licensed listening platform (Brandwatch, Meltwater, Talkwalker, Sprinklr) used as a data source, or an X Enterprise / written approval. There is no cheap route that is both legal and built for multi-client resale.</p>
+        </div>
+
+        <h3>Demo budget: legal options only, one month</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Demo scenario</th><th>What you buy</th><th class="num">USD</th><th class="num">INR (₹88)</th><th>What the demo can show</th></tr></thead>
+            <tbody>
+              <tr><td><b>A · Trend-only</b></td><td>Counts (Recent) for 10 keywords, once a day for 30 days = 300 requests at $0.005</td><td class="num">$1.50</td><td class="num">≈ ₹130</td><td>Volume over time and share of voice per keyword. No post text.</td></tr>
+              <tr><td><b>B · Minimum with real posts</b></td><td>Scenario A plus 2,000 post reads at $0.005</td><td class="num">$11.50</td><td class="num">≈ ₹1,000</td><td>Trend lines plus a few hundred real example posts per topic for narratives and tone.</td></tr>
+              <tr><td><b>C · Solid demo</b></td><td>Scenario A plus 10,000 post reads, plus 5 account lookups at $0.010</td><td class="num">$51.55</td><td class="num">≈ ₹4,500</td><td>Narrative clusters, top public accounts, spike detection on the CJP / Congress / AISA topics.</td></tr>
+              <tr><td><b>D · Client-ready pilot</b></td><td>Scenario A plus 25,000 post reads</td><td class="num">$126.50</td><td class="num">≈ ₹11,100</td><td>Enough depth for a credible 2–3 topic report with confidence notes.</td></tr>
+              <tr><td><b>E · Large sample</b></td><td>Scenario A plus 100,000 post reads</td><td class="num">$501.50</td><td class="num">≈ ₹44,100</td><td>Near-pilot volume; use only after X approval for the client use case.</td></tr>
+              <tr><td><b>F · Tool seat instead of API</b></td><td>One monthly seat on a listening tool such as Awario or Brand24 (about $29–49)</td><td class="num">$29–49</td><td class="num">≈ ₹2,500–4,300</td><td>Screens to look at, not data you can load into your own dashboard. Check the vendor's terms before showing client-facing numbers.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="tiny"><b>Minimum to pay:</b> about <b>₹130</b> for trend-only, about <b>₹1,000</b> to include real posts. Prices are the public pay-per-use rates from docs.x.com (7 Nov 2026), before GST and card fees. Re-reading the same post within one UTC day is not billed twice. X may set a minimum credit top-up; check the developer console before buying. Add LLM tagging and hosting from the tier cards if you run them.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Route</th><th>Licensed by X?</th><th>Cost (public)</th><th>Fit for a resold political-analytics product</th></tr></thead>
+            <tbody>
+              <tr><td><b>1 · X API pay-per-use</b></td><td>Yes (Developer Agreement, updated 27 Apr 2026)</td><td>$0.005/post, $0.010/user, $0.005/Counts request; 3M reads/month cap</td><td>Good for a pilot or one own-brand dashboard. Scope is "prototyping, early-stage, limited end-users". Multi-client resale: get written approval first.</td></tr>
+              <tr><td><b>2 · X Enterprise</b></td><td>Yes</td><td>Unpublished; third parties cite ~$42k+/month (unverified)</td><td>The contractual home for scale and resale. Ask for a quote; also ask whether client-facing analytics is permitted.</td></tr>
+              <tr><td><b>3 · Licensed listening platforms</b> (Brandwatch, Meltwater, Talkwalker, Sprinklr)</td><td>Historic X Official Partners; current terms not confirmed in public sources</td><td>Quote only; Brandwatch reported around $50k+/year (Vendr, unverified). Awario / Brand24 from ~$29–49/month are cheap but are tools, not data licences</td><td>Cheapest legal way to <em>use</em> X data for client reports if you buy seats rather than resell raw data. Their terms usually bar resale of the platform's data too, so check.</td></tr>
+              <tr><td><b>4 · India-based listening vendors</b> (Locobuzz, Kreara and similar)</td><td>Unknown. No public evidence found of an X licence</td><td>Quote only</td><td>Ask each for written proof of their X data licence before relying on them.</td></tr>
+              <tr><td><b>5 · Data resellers</b> (twitterapi.io, SocialData, Apidirect)</td><td>No. They state no affiliation with X</td><td>$0.15–0.20 per 1k posts</td><td>Not recommended. X's agreement bars sell/sublicense, and a client contract cannot rest on a vendor that has no licence.</td></tr>
+              <tr><td><b>6 · Scrapers / Bright Data / Apify</b></td><td>No</td><td>Per-record or subscription</td><td>A 2024 US ruling (X v. Bright Data) dismissed X's contract and tort claims over scraping public data, but it is not Indian law and gives no licence. Highest risk for a product sold to political clients.</td></tr>
+              <tr><td><b>7 · Logged-out manual capture</b></td><td>Not an API; ToS still applies</td><td>Free</td><td>Fine for the CJP demo capture on this machine. Does not scale and is not a product data source.</td></tr>
+              <tr><td><b>8 · Academic / research access</b></td><td>Closed to new commercial use</td><td>—</td><td>Not available for a commercial product.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Does your brief fit X's rules?</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+            <tbody>
+              <tr><td>1 · Permitted under the ToS and Developer Agreement?</td><td>Partly. Commercial use is allowed. Analysis of X content is allowed only "as explicitly approved by X" (II.A.1); client-facing analytics is not addressed, so confirm in writing. No sell, sublicense, redistribute or service-bureau use (III.A).</td></tr>
+              <tr><td>2 · Enterprise, approval or licence needed?</td><td>Likely yes once you serve several paying clients. Pay-per-use covers limited end-users; X can require Enterprise after a usage review (III.J, III.L, III.M). Government end-user display needs Enterprise (XIV.C).</td></tr>
+              <tr><td>3 · Higher-risk parts</td><td>(a) Protest and rally coverage: X lists protests, rallies and community organising as sensitive events it does not allow tracking. (b) Political clients plus stance labelling: inferring political affiliation or beliefs is prohibited. (c) Resale of raw posts. (d) Public display of posts: no iframe embedding; only IDs may be redistributed.</td></tr>
+              <tr><td>4 · Fields</td><td><b>Needed:</b> post ID, text (for processing), timestamp, language, public engagement counts, URL. <b>Avoid:</b> usernames or user IDs in the store (X allows aggregate analysis only when no identifiers are stored; hashed IDs are a grey area, so ask X), location beyond the post, bio text for inference, follower graphs.</td></tr>
+              <tr><td>5 · Safeguards</td><td>Aggregate-only outputs; no user-level views; delete or modify within 24 hours of an X deletion; no model training on X data; log source, sample size and capture date on every number; no DMs, no automation or posting; no individual bot labels; retain raw text only as long as the licence allows; a written X approval on file; legal review under India's DPDP Act (rules notified 13 Nov 2025, main duties from 13 May 2027).</td></tr>
+              <tr><td>6 · What can be inferred honestly</td><td><b>Can:</b> volume, share of voice, topic and narrative clusters, tone of public posts, timing and spikes, which public accounts amplify a theme. <b>Cannot:</b> election outcomes or vote share, who a person supports, religion, caste or other traits of individuals, whether a named person is a bot, or what the silent majority thinks. X users are not a representative sample of Indian voters.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Recommended path (cheapest that holds up)</h3>
+        <div class="flow">
+          <div class="step"><div class="n">01</div><b>Pilot on pay-per-use</b><span>Counts for volume, ~100k sampled posts/month ≈ $500</span></div>
+          <div class="step"><div class="n">02</div><b>Email X</b><span>Ask in writing: client analytics, political clients, protests, identifier rules</span></div>
+          <div class="step"><div class="n">03</div><b>Get quotes</b><span>X Enterprise plus one licensed listening vendor, with proof of X licence</span></div>
+          <div class="step"><div class="n">04</div><b>Decide at first paid client</b><span>Enterprise, or buy platform seats instead of raw data</span></div>
+        </div>
+        <p class="tiny">Not legal advice. Enterprise pricing and partner status could not be verified from public sources; the $42k and $50k figures are third-party estimates.</p>
+      </section>
+
+      <!-- 03 -->
+      <section class="block" id="tiers">
+        <h2><span class="kicker">03 · The three sizes</span>The cost tiers, from the MVP plan</h2>
+        <p>The product spec already defines three operating sizes. The numbers below are the data + LLM + hosting lines from `MVP/16`. They exclude people, legal, annotation and taxes.</p>
+
+        <div class="tier-grid">
+          <div class="tier">
+            <div class="tlabel">Tier S</div>
+            <h3>Lean demo</h3>
+            <div class="price">₹27–32k <span>/ month</span></div>
+            <p>~15k posts/day. Enough to build, demo and run a small pilot.</p>
+            <ul>
+              <li>X 400k posts/month</li>
+              <li>IG/FB watchlist 20k</li>
+              <li>YouTube + RSS free</li>
+              <li>Data ~$110 · LLM ~$20</li>
+              <li>Hosting ~₹12k</li>
+            </ul>
+            <div class="for">Use: build, demos, first paid pilot</div>
+          </div>
+          <div class="tier recommended">
+            <div class="pill-rec">Default</div>
+            <div class="tlabel">Tier M</div>
+            <h3>Pilot</h3>
+            <div class="price">₹55–70k <span>/ month</span></div>
+            <p>~50k posts/day. The default for a real client pilot.</p>
+            <ul>
+              <li>X 1.2M posts/month</li>
+              <li>IG 25k + FB 25k</li>
+              <li>YouTube comments + RSS</li>
+              <li>Data ~$330 · LLM ~$120–170</li>
+              <li>Hosting ~₹15k</li>
+            </ul>
+            <div class="for">Use: first political/brand pilot</div>
+          </div>
+          <div class="tier">
+            <div class="tlabel">Tier L</div>
+            <h3>Campaign</h3>
+            <div class="price">₹1.3–1.6L <span>/ month</span></div>
+            <p>~200k posts/day. Campaign-scale coverage, billed to the client.</p>
+            <ul>
+              <li>X ~5.5–6M reads/month</li>
+              <li>Unsampled, or 3:1 sampling to cut cost</li>
+              <li>Data ~$850 (~$300 if sampled)</li>
+              <li>LLM ~$250</li>
+              <li>Hosting ~₹40k</li>
+            </ul>
+            <div class="for">Use: election campaign, war room</div>
+          </div>
+        </div>
+
+        <div class="callout key">
+          <div class="label">What is not in these numbers</div>
+          <p>People, annotation, legal, incorporation and analyst salaries. Add <strong>₹0.5–1.5L one-time</strong> for the gold set, <strong>₹0.5–1L</strong> for legal, and <strong>₹1.5–3L/month</strong> for a data engineer plus analyst if you build in-house. The all-in cost to run the business is higher than the data bill.</p>
+        </div>
+      </section>
+
+      <!-- 04 -->
+      <section class="block" id="calculator">
+        <h2><span class="kicker">04 · The calculator</span>Move the inputs, see the bill</h2>
+        <p>This uses the same unit prices as the source table. It is a budget envelope, not a quote. Start with a preset, then change the X route to see why the official API is a different business.</p>
+
+        <div class="calc">
+          <div class="preset-row" role="group" aria-label="Presets">
+            <button class="preset active" data-preset="pilot" type="button">Tier M · pilot</button>
+            <button class="preset" data-preset="lean" type="button">Tier S · lean</button>
+            <button class="preset" data-preset="campaign" type="button">Tier L · campaign</button>
+            <button class="preset" data-preset="official" type="button">Same pilot · official X (legal)</button>
+          </div>
+          <div class="calc-grid">
+            <div>
+              <div class="calc-field">
+                <label for="posts">Posts per day <output id="postsOut">50,000</output></label>
+                <input id="posts" type="range" min="1000" max="200000" step="1000" value="50000" />
+              </div>
+              <div class="calc-field">
+                <label for="xshare">Share of posts from X <output id="xshareOut">80%</output></label>
+                <input id="xshare" type="range" min="20" max="100" step="5" value="80" />
+              </div>
+              <div class="calc-field">
+                <label for="xprice">X data route</label>
+                <select id="xprice">
+                  <option value="0.15" selected>Unlicensed reseller — $0.15 / 1k (not for clients)</option>
+                  <option value="0.20">Unlicensed reseller — $0.20 / 1k (not for clients)</option>
+                  <option value="5.00">Official X — $5.00 / 1k (licensed)</option>
+                </select>
+              </div>
+              <div class="calc-field">
+                <label for="igfb">Instagram + Facebook records / month <output id="igfbOut">50,000</output></label>
+                <input id="igfb" type="range" min="0" max="150000" step="5000" value="50000" />
+              </div>
+              <div class="calc-field">
+                <label for="igprice">IG/FB provider price</label>
+                <select id="igprice">
+                  <option value="1.50">Low — $1.50 / 1k</option>
+                  <option value="2.50" selected>Mid — $2.50 / 1k</option>
+                  <option value="5.00">High — $5.00 / 1k</option>
+                </select>
+              </div>
+              <div class="calc-field">
+                <label for="llm">LLM calls per post <output id="llmOut">0.80</output></label>
+                <input id="llm" type="range" min="0" max="1" step="0.05" value="0.8" />
+              </div>
+              <div class="calc-field">
+                <label for="llmprice">LLM price / 1k calls</label>
+                <select id="llmprice">
+                  <option value="0.04">Cheap — $0.04</option>
+                  <option value="0.10" selected>Mid — $0.10</option>
+                  <option value="0.17">High — $0.17</option>
+                </select>
+              </div>
+              <div class="calc-field">
+                <label for="hosting">Hosting / month (₹) <output id="hostingOut">₹15,000</output></label>
+                <input id="hosting" type="range" min="12000" max="40000" step="1000" value="15000" />
+              </div>
+              <div class="calc-field">
+                <label for="months">Months for total <output id="monthsOut">3</output></label>
+                <input id="months" type="range" min="1" max="12" step="1" value="3" />
+              </div>
+            </div>
+            <div class="calc-result">
+              <div class="rl">Estimated monthly run-rate</div>
+              <div class="big" id="monthlyUsd">$0<span> / mo</span></div>
+              <div class="inr" id="monthlyInr">≈ ₹0 L / month</div>
+              <div class="split">
+                <div class="row"><span>X data</span><b id="costX">$0</b></div>
+                <div class="row"><span>IG / FB data</span><b id="costIg">$0</b></div>
+                <div class="row"><span>LLM tagging</span><b id="costLlm">$0</b></div>
+                <div class="row"><span>Hosting</span><b id="costHost">$0</b></div>
+                <div class="row"><span>Contingency (10%)</span><b id="costCont">$0</b></div>
+                <div class="row"><span>Total for months</span><b id="costTotal">$0</b></div>
+              </div>
+              <div class="warnline" id="officialWarn">—</div>
+            </div>
+          </div>
+          <p class="calc-note">Assumptions: 30 days/month; X reseller $0.15–0.20/1k; official X $5/1k; IG/FB $1.50–5/1k; LLM $0.04–0.17 per 1k calls; hosting ₹12–40k; INR ₹88/USD; 10% contingency included. Excludes people, annotation, legal, GST and one-time backfill. Backfill is roughly $105 (Tier S) to $315 (Tier M).</p>
+        </div>
+
+        <h3>The X decision, in one table</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Monthly X volume</th><th>Reseller at $0.15/1k</th><th>Official at $5/1k</th><th>Difference</th></tr></thead>
+            <tbody>
+              <tr><td>400,000 posts</td><td class="num">$60</td><td class="num">$2,000</td><td class="num">33×</td></tr>
+              <tr><td>1,200,000 posts</td><td class="num">$180</td><td class="num">$6,000</td><td class="num">33×</td></tr>
+              <tr><td>5,500,000 posts</td><td class="num">$825</td><td class="num">$27,500</td><td class="num">33×</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="tiny">The official API is the only licensed route; the reseller is cheap but unlicensed and is shown for comparison only. Cut the official bill by reading fewer posts (Counts endpoint plus a sample), not by switching to a reseller. See §2b.</p>
+      </section>
+
+      <!-- 05 -->
+      <section class="block" id="one-time">
+        <h2><span class="kicker">05 · Before month one</span>The one-time costs</h2>
+        <p>The monthly bill is not the whole cost. Four things happen once, before the dashboard can make an accuracy claim.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>What it buys</th><th>Estimate</th><th>When</th></tr></thead>
+            <tbody>
+              <tr><td><b>Gold-set annotation</b></td><td>500–4,500 human-labelled posts across 9 languages + Hinglish; inter-annotator agreement; per-language accuracy card</td><td><b>₹0.5–1.5L</b></td><td>Weeks 2–7</td></tr>
+              <tr><td><b>Legal review</b></td><td>DPDP, platform terms, Meta/ToS risk, DPA templates, retention policy</td><td><b>₹0.5–1L</b></td><td>Weeks 0–3</td></tr>
+              <tr><td><b>90-day backfill</b></td><td>History for demos and the first pilot</td><td><b>~$105 (S)</b> / <b>~$315 (M)</b></td><td>Week 2</td></tr>
+              <tr><td><b>Build / setup</b></td><td>Collectors, schema, dashboard, deploy, monitoring</td><td><b>₹2–6L</b> (or founder time)</td><td>Weeks 1–12</td></tr>
+              <tr><td><b>Contingency</b></td><td>Vendor breakage, scrapers, re-runs, FX</td><td><b>10–15%</b> of the above</td><td>Ongoing</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn">
+          <div class="label">The accuracy trap</div>
+          <p>The dashboard can show sentiment on day one. It cannot <em>claim</em> per-language accuracy until the gold set exists. The MVP rule is explicit: no per-language accuracy claim before the V8 pilot (week 7) and the gold set (CP-3). That is why annotation is a cost line, not a nice-to-have.</p>
+        </div>
+      </section>
+
+      <!-- 06 -->
+      <section class="block" id="depth">
+        <h2><span class="kicker">06 · The demo vs production</span>What “dashboard-design depth” adds</h2>
+        <p>The `dashboard-design` demo shows 6,060 posts over 30 days — about 200 posts/day. That is a <strong>UI sample</strong>, not the production target. At production Tier S, the system handles 15,000 posts/day, 75× the demo.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Dashboard page / feature</th><th>Data it needs</th><th>Source</th><th>Cost driver</th></tr></thead>
+            <tbody>
+              <tr><td>Overview · volume, sentiment, platform mix</td><td>Post corpus + stance labels</td><td>X, IG, YouTube, news</td><td>X volume + LLM + annotation</td></tr>
+              <tr><td>Live Radar</td><td>Fresh posts, 5–15 min cadence</td><td>X, YouTube, RSS</td><td>Polling + X reads</td></tr>
+              <tr><td>Topic Explorer</td><td>Searchable corpus + entity dictionary</td><td>All conversation sources</td><td>Storage + search</td></tr>
+              <tr><td>Word Lab</td><td>Tokenised text + language ID</td><td>Corpus</td><td>CPU only</td></tr>
+              <tr><td>Areas</td><td>State/district signals</td><td>Keyword bundles + profile location + maps</td><td>Limited by geo data</td></tr>
+              <tr><td>Entity 360</td><td>Share of voice, stance by entity</td><td>Corpus + entity registry</td><td>Annotation + LLM</td></tr>
+              <tr><td>Narratives &amp; coordination</td><td>Clusters, near-duplicates, co-shares</td><td>X/Telegram/Reddit</td><td>Embeddings + compute</td></tr>
+              <tr><td>Language &amp; Platform</td><td>Language ID, platform mix</td><td>Corpus</td><td>Language model + QA</td></tr>
+              <tr><td>Media</td><td>News, YouTube, fact-checks</td><td>RSS, GDELT, YouTube, fact-checkers</td><td>Mostly free</td></tr>
+              <tr><td>Alerts / Incidents</td><td>Thresholds, review workflow</td><td>Derived from corpus</td><td>Engineering + analyst</td></tr>
+              <tr><td>Reports</td><td>Analyst-authored briefs</td><td>All of the above</td><td>Analyst hours</td></tr>
+              <tr><td>Ground Truth</td><td>Survey/field data</td><td>Client CSV / field partner</td><td>Per study</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout key">
+          <div class="label">The honest reading</div>
+          <p>The expensive parts of “dashboard depth” are not the pages. They are the <strong>X volume</strong>, the <strong>annotation</strong>, and the <strong>analyst time</strong>. The free layers — news, YouTube, election data, GDELT, Wikipedia — give the dashboard most of its credibility at almost no data cost.</p>
+        </div>
+      </section>
+
+      <!-- 07 -->
+      <section class="block" id="limits">
+        <h2><span class="kicker">07 · The edges</span>What we cannot get, at any price</h2>
+        <p>A credible plan says “no” clearly. These are the permanent or near-permanent gaps.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Gap</th><th>Why</th><th>What to do instead</th></tr></thead>
+            <tbody>
+              <tr><td><b>WhatsApp conversations</b></td><td>Private and encrypted; no public API</td><td>Public tipline, field interviews, manual channel following; label the blind spot</td></tr>
+              <tr><td><b>Facebook public page posts</b></td><td>No self-serve API for pages you don't own; MCL is research-only</td><td>Apify watchlist, licensed provider, academic MCL partner, or profile/ad-level only</td></tr>
+              <tr><td><b>Instagram comments text</b></td><td>Business Discovery returns counts, not comments; comments need owner permission</td><td>Caption-level stance; owned-account API; vendor for comments</td></tr>
+              <tr><td><b>Instagram full history</b></td><td>Business Discovery returns recent media, not an archive</td><td>Start collecting now; backfill only via vendor/research access</td></tr>
+              <tr><td><b>Reach / impressions / demographics</b></td><td>Platform-only; not exposed for other accounts</td><td>Use followers/views as proxies, clearly labelled; never call it reach</td></tr>
+              <tr><td><b>Voter-level data</b></td><td>Illegal/ethically out of scope</td><td>Aggregate social signal + surveys; refuse profiling work</td></tr>
+              <tr><td><b>Deleted / withheld content</b></td><td>Platform or legal block</td><td>Record the absence; do not circumvent</td></tr>
+              <tr><td><b>“All” of X</b></td><td>3M reads/month cap; keyword search, not firehose</td><td>Quote the coverage; sample; state the window</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout danger">
+          <div class="label">The red line</div>
+          <p>No voter profiling, no individual “bot” labels, no private groups, no WhatsApp scraping, no block circumvention. Those are not cost problems; they are product-ending problems.</p>
+        </div>
+      </section>
+
+      <!-- 08 -->
+      <section class="block" id="research">
+        <h2><span class="kicker">08 · What changed</span>Latest research corrections</h2>
+        <p>These are the findings from the 2026 platform checks that change the budget or the architecture.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>What we thought</th><th>What is true now</th><th>Effect on cost/plan</th></tr></thead>
+            <tbody>
+              <tr><td>X API is ~$200/month</td><td>Pay-per-use, <b>$0.005/post read</b>; 1.2M posts ≈ $6,000/month; 3M read cap</td><td>Official X is expensive at volume: budget a sampled read (~100k posts ≈ $500) plus Counts, and seek X approval or Enterprise before reselling. Reseller is not a safe default</td></tr>
+              <tr><td>Instagram public data is unavailable</td><td><b>Business Discovery</b> returns recent posts, captions and like/comment/view counts for other professional accounts</td><td>Official IG becomes viable for recent posts; no comments text or history</td></tr>
+              <tr><td>Instagram has to be scraped</td><td>Apify watchlist is still needed for comments/history, but it is a supplement, not the only route</td><td>Lower legal risk for the first version; keep the watchlist small</td></tr>
+              <tr><td>YouTube text can be kept 90+ days</td><td>Public non-authorised data: <b>max 30 days</b></td><td>Delete raw text after 30 days; keep derived scores</td></tr>
+              <tr><td>Telegram is free and easy</td><td>Feb-2026 ToS adds a scraping prohibition; no commercial carve-out</td><td>Gate it behind counsel; default OFF; no fallback</td></tr>
+              <tr><td>Reddit API is free</td><td>Free non-commercial ~100 QPM; commercial ~$0.24/1k</td><td>Phase 2; get a quote before building</td></tr>
+              <tr><td>Google Trends via pytrends</td><td>`pytrends` unmaintained; official API is alpha/application-based</td><td>Use SerpApi or skip; don’t build on pytrends</td></tr>
+              <tr><td>NewsAPI free is enough</td><td>Free tier is development-only; production <b>$449/month</b></td><td>RSS + GDELT first; NewsAPI only if needed</td></tr>
+              <tr><td>Meta Ad Library needs no setup</td><td>Identity/location verification + developer app</td><td>Start verification early; free but slow</td></tr>
+              <tr><td>Scraping Meta is low risk</td><td>US *Meta v Bright Data* (2024) is not an Indian precedent; still breaches Meta ToS</td><td>Watchlist only; counsel sign-off; no firehose</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 09 -->
+      <section class="block" id="plan">
+        <h2><span class="kicker">09 · The sequence</span>Recommended plan</h2>
+        <p>Do not buy the expensive sources first. Build the free record layer, prove the questions, then add volume.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Phase</th><th>Add</th><th>Monthly data cost</th><th>What it proves</th></tr></thead>
+            <tbody>
+              <tr><td><b>0 · Free baseline</b><br><span class="sub">Week 1</span></td><td>Public profiles, YouTube API, RSS/GDELT, election data, manual Telegram</td><td><b>₹0–5k</b></td><td>The record layer and the UI; no volume or sentiment claims</td></tr>
+              <tr><td><b>1 · Tier S</b><br><span class="sub">Weeks 2–4</span></td><td>X 400k/month via reseller; IG/FB watchlist 20k; LLM tagging</td><td><b>₹27–32k</b></td><td>Volume, platform mix, first sentiment; demo-ready</td></tr>
+              <tr><td><b>2 · Tier M</b><br><span class="sub">Weeks 4–8</span></td><td>X 1.2M; IG 25k + FB 25k; YouTube comments; gold set</td><td><b>₹55–70k</b></td><td>Per-language accuracy, coordination, alerts</td></tr>
+              <tr><td><b>3 · Tier L</b><br><span class="sub">Campaign</span></td><td>X 5.5–6M; unsampled or 3:1 sampled; more languages</td><td><b>₹1.3–1.6L</b></td><td>Campaign-scale coverage, billed to client</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout honest">
+          <div class="label">What I would do first</div>
+          <p>Start with the free record layer and the current CJP capture. Add <strong>Instagram Business Discovery</strong> (free) and a <strong>sampled official X pilot</strong> (Counts plus ~100k posts, ~$500). Email X in parallel for written approval of the client-analytics use case. The ₹27–32k lean figures below assumed a reseller; with official X add roughly ₹40k. That is enough to build a real dashboard with volume and recent IG posts for under ₹30k/month. Only add Facebook watchlist, Telegram and 1.2M X volume after the first client says the output is useful.</p>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section class="block" id="checklist">
+        <h2><span class="kicker">10 · The practical checklist</span>What we need from you</h2>
+        <div class="grid-2">
+          <div class="mini-card">
+            <h4>Accounts and keys</h4>
+            <ul>
+              <li>X developer account + pay-per-use credits; send X the written-approval request (§2b)</li>
+              <li>Meta developer app + research Instagram professional account + Facebook Page</li>
+              <li>Google Cloud project + YouTube Data API key</li>
+              <li>Telegram number + API ID/hash (if Telegram is approved)</li>
+              <li>Reddit OAuth app (if Reddit is in scope)</li>
+              <li>NewsAPI/Event Registry key (optional)</li>
+              <li>Apify/Bright Data account or vendor contract</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <h4>Decisions and cover</h4>
+            <ul>
+              <li>Confirm D3: official X only, reseller dropped (recommended)</li>
+              <li>Approve a 50-account IG/FB watchlist (D4)</li>
+              <li>Approve Telegram gated/off by default</li>
+              <li>Legal review: DPDP, ToS, DPA, retention</li>
+              <li>Budget: Tier S/M/L and one-time costs</li>
+              <li>One data engineer + one annotator</li>
+              <li>Scope: actors, languages, date window</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout legal">
+          <div class="label">Bottom line</div>
+          <p>The dashboard is buildable with real data at <strong>₹27–32k/month</strong> for a lean version and <strong>₹55–70k/month</strong> for the default pilot. The expensive parts are X volume, annotation and analyst time — not the dashboard itself. The ₹ figures use reseller prices for X and are not licence-safe; official X adds roughly ₹40k–5L depending on posts read. The biggest risks are X's licence scope for resale, Telegram’s terms, and Facebook’s lack of a public API. All three are decisions to make explicitly, not gaps to hide.</p>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="block" id="links">
+        <h2><span class="kicker">11 · Evidence</span>Sources checked</h2>
+        <p class="small">Platform rules and prices checked on 5 November 2026. Re-verify before contracting.</p>
+        <div class="sources">
+          <a href="https://docs.x.com/x-api/getting-started/pricing" target="_blank" rel="noopener"><b>X API — pay-per-use pricing</b><span>$0.005/post read · $0.010/user · 3M reads/month · docs.x.com</span></a>
+          <a href="https://docs.x.com/developer-terms/agreement" target="_blank" rel="noopener"><b>X Developer Agreement (27 Apr 2026)</b><span>III.A resale limits · II.A.1 approved analysis · docs.x.com</span></a>
+          <a href="https://docs.x.com/developer-terms/restricted-use-cases" target="_blank" rel="noopener"><b>X restricted use cases</b><span>Sensitive events, inference bans, aggregate rule · docs.x.com</span></a>
+          <a href="https://docs.x.com/developer-terms/ppu-agreement" target="_blank" rel="noopener"><b>X pay-per-use agreement</b><span>Scope: prototyping, limited end-users · docs.x.com</span></a>
+          <a href="https://twitterapi.io/blog/twitter-api-license" target="_blank" rel="noopener"><b>twitterapi.io — licence note</b><span>Reseller; states no affiliation with X</span></a>
+          <a href="https://docs.x.com/x-api/posts/search/introduction" target="_blank" rel="noopener"><b>X API — Search Posts</b><span>Recent 7 days vs full archive · docs.x.com</span></a>
+          <a href="https://developers.facebook.com/documentation/instagram-platform/overview" target="_blank" rel="noopener"><b>Meta — Instagram Platform overview</b><span>Professional accounts, access levels, app review, business verification</span></a>
+          <a href="https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-facebook-login/business-discovery" target="_blank" rel="noopener"><b>Meta — Instagram Business Discovery</b><span>Public metadata and recent media for other professional accounts</span></a>
+          <a href="https://developers.facebook.com/documentation/instagram-platform/reference/instagram-media" target="_blank" rel="noopener"><b>Meta — IG Media fields</b><span>caption, timestamp, permalink, comments_count, like_count, view_count</span></a>
+          <a href="https://developers.facebook.com/docs/content-library-and-api/get-access/" target="_blank" rel="noopener"><b>Meta — Content Library access</b><span>Academic/non-profit research only; 2–3 week review</span></a>
+          <a href="https://www.facebook.com/ads/library/api/" target="_blank" rel="noopener"><b>Meta — Ad Library API</b><span>Political/issue ads; identity verification</span></a>
+          <a href="https://developers.google.com/youtube/data/determine_quota_cost" target="_blank" rel="noopener"><b>YouTube — quota costs</b><span>10k units/day; 100 search calls/day; 100 videos.insert/day</span></a>
+          <a href="https://core.telegram.org/api/obtaining_api_id" target="_blank" rel="noopener"><b>Telegram — obtaining api_id</b><span>my.telegram.org · API ID/hash</span></a>
+          <a href="https://www.redditcommentscraper.com/article-reddit-api-pricing-alternative.html" target="_blank" rel="noopener"><b>Reddit API pricing 2026</b><span>~$0.24/1k calls commercial; free 100 QPM non-commercial</span></a>
+          <a href="https://newsapi.org/pricing" target="_blank" rel="noopener"><b>NewsAPI — pricing</b><span>Free dev; Business $449/month</span></a>
+          <a href="https://developers.google.com/search/blog/2025/07/trends-api" target="_blank" rel="noopener"><b>Google Trends API (alpha)</b><span>Application-based; announced July 2025</span></a>
+          <a href="https://konnectinsights.com/pricing/" target="_blank" rel="noopener"><b>Konnect Insights — pricing</b><span>$39–129/user/month</span></a>
+          <a href="https://www.softwareadvice.com/crm/locobuzz-profile/" target="_blank" rel="noopener"><b>Locobuzz — pricing</b><span>From ~$399/month</span></a>
+        </div>
+        <p class="tiny" style="margin-top:14px">Internal source documents are held in the private Avensar Signal repository.</p>
+      </section>
+
+      <div class="footer">
+        <div class="footer-brand">
+          <span class="fmark">AS</span>
+          <div class="fname">Avensar Signal<span>An Avensar product</span></div>
+        </div>
+        <div class="proprietary"><b>Proprietary &amp; confidential.</b> © 2026 Avensar. All rights reserved. Avensar and Avensar Signal are proprietary marks of Avensar. This document, its design system, data model, cost logic and source code are confidential and proprietary. No part may be copied, reproduced, distributed or used to build a competing product without prior written permission.</div>
+        <p><b>Avensar Signal — data requirements &amp; cost plan.</b> Prepared 5 November 2026; X section updated 7 November 2026. Prices are budget envelopes, not vendor quotes; FX ₹88/USD. The legal notes are a research summary, not legal advice. Verify platform terms, taxes and vendor contracts before committing.</p>
+        <p style="margin-top:6px">Avensar · Pune, Maharashtra, India · ops@avensar.com · avensar.com</p>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var INR = 88;
+  function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
+  function lakh(n){ return '₹' + (n/100000).toFixed(2) + ' L'; }
+
+  var posts = $('posts'), xshare = $('xshare'), xprice = $('xprice'),
+      igfb = $('igfb'), igprice = $('igprice'), llm = $('llm'),
+      llmprice = $('llmprice'), hosting = $('hosting'), months = $('months');
+
+  function val(el){ return Number(el.value); }
+
+  function calc(){
+    var p = val(posts), xs = val(xshare)/100, xp = val(xprice),
+        ig = val(igfb), ip = val(igprice), lc = val(llm),
+        lp = val(llmprice), hostInr = val(hosting), m = val(months);
+
+    $('postsOut').textContent = p.toLocaleString('en-US');
+    $('xshareOut').textContent = Math.round(xs*100) + '%';
+    $('igfbOut').textContent = ig.toLocaleString('en-US');
+    $('llmOut').textContent = lc.toFixed(2);
+    $('hostingOut').textContent = '₹' + hostInr.toLocaleString('en-IN');
+    $('monthsOut').textContent = m;
+
+    var postsMonth = p * 30;
+    var xPosts = postsMonth * xs;
+    var cx = (xPosts/1000) * xp;
+    var ci = (ig/1000) * ip;
+    var calls = postsMonth * lc;
+    var cl = (calls/1000) * lp;
+    var ch = hostInr / INR;
+    var subtotal = cx + ci + cl + ch;
+    var contingency = subtotal * 0.10;
+    var total = subtotal + contingency;
+
+    $('costX').textContent = fmt(cx);
+    $('costIg').textContent = fmt(ci);
+    $('costLlm').textContent = fmt(cl);
+    $('costHost').textContent = fmt(ch);
+    $('costCont').textContent = fmt(contingency);
+    $('costTotal').textContent = fmt(total * m);
+    $('monthlyUsd').innerHTML = fmt(total) + '<span> / mo</span>';
+    $('monthlyInr').textContent = '≈ ' + lakh(total * INR) + ' / month';
+
+    var xOfficial = (xPosts/1000) * 5;
+    var delta = xOfficial - cx;
+    if (xp < 5) {
+      $('officialWarn').textContent = 'Reseller price shown is unlicensed. The legal official price is $5/1k: ' + fmt(total + delta) + '/mo — ' + fmt(delta) + ' more per month.';
+    } else {
+      $('officialWarn').textContent = 'Official X route selected. At ' + Math.round(xPosts).toLocaleString('en-US') + ' X posts/month, this is ' + fmt(cx) + ' of the bill.';
+    }
+  }
+
+  [posts, xshare, xprice, igfb, igprice, llm, llmprice, hosting, months].forEach(function(el){
+    el.addEventListener('input', calc);
+    el.addEventListener('change', calc);
+  });
+
+  var presets = {
+    lean:     { p:15000,  xs:85, xp:'0.15', ig:20000, ip:'2.50', lc:0.60, lp:'0.10', h:12000, m:3 },
+    pilot:    { p:50000,  xs:80, xp:'0.15', ig:50000, ip:'2.50', lc:0.80, lp:'0.10', h:15000, m:3 },
+    campaign: { p:200000, xs:80, xp:'0.15', ig:50000, ip:'2.50', lc:0.80, lp:'0.10', h:40000, m:6 },
+    official: { p:50000,  xs:80, xp:'5.00', ig:50000, ip:'2.50', lc:0.80, lp:'0.10', h:15000, m:3 }
+  };
+
+  document.querySelectorAll('.preset').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var p = presets[btn.getAttribute('data-preset')];
+      posts.value = p.p; xshare.value = p.xs; xprice.value = p.xp;
+      igfb.value = p.ig; igprice.value = p.ip; llm.value = p.lc;
+      llmprice.value = p.lp; hosting.value = p.h; months.value = p.m;
+      document.querySelectorAll('.preset').forEach(function(b){ b.classList.toggle('active', b === btn); });
+      calc();
+    });
+  });
+  calc();
+
+  // Reading progress + active TOC
+  var bar = $('readbar');
+  var tocLinks = [].slice.call(document.querySelectorAll('#toc a'));
+  var sections = tocLinks.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop/max)*100 : 0) + '%';
+    var current = sections[0];
+    sections.forEach(function(s){ if(s.getBoundingClientRect().top <= 140) current = s; });
+    if(current){ tocLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + current.id); }); }
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(!ticking){ requestAnimationFrame(function(){ onScroll(); ticking = false; }); ticking = true; }
+  }, {passive:true});
+  onScroll();
+})();
+</script>
+
+</body>
+</html>
+
+
+

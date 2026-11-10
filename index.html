@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Avensar Signal — Public conversation intelligence</title>
+<style>
+  :root{
+    --bg:#FAF9F5; --surface:#FFFFFF; --surface-2:#F3F0E8; --surface-3:#EAE5D9;
+    --border:#E4DFD3; --border-strong:#8C8678;
+    --text:#1F1E1B; --text-2:#55514A; --text-muted:#6B665C;
+    --accent:#DA7756; --accent-strong:#C15F3C; --accent-text:#A8482A; --accent-soft:#FBEAE3;
+    --ok:#1E7B55; --ok-bg:#E6F3EC; --warn:#8A5A00; --warn-bg:#FFF3D6;
+    --font:Inter,"Segoe UI",system-ui,-apple-system,"Noto Sans Devanagari","Nirmala UI","Noto Sans",Roboto,sans-serif;
+    --serif:"Iowan Old Style","Palatino Linotype",Charter,Georgia,"Noto Serif Devanagari","Nirmala UI",serif;
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+    --r:16px; --sh:0 1px 2px rgba(31,30,27,.05),0 1px 1px rgba(31,30,27,.03);
+    --sh2:0 14px 40px -16px rgba(31,30,27,.20),0 2px 8px rgba(31,30,27,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,p{margin:0}
+  a{color:var(--accent-text);text-underline-offset:2px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  .top{display:flex;align-items:center;gap:12px;padding:22px 0;border-bottom:1px solid var(--border)}
+  .mark{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:var(--text);color:#fff;font-size:12px;font-weight:800;letter-spacing:-.03em}
+  .brand{display:flex;align-items:baseline;gap:8px;font-weight:700;font-size:17px;letter-spacing:-.02em}
+  .brand span{color:var(--accent-text)}
+  .chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--text);color:#F3F0E8;font-size:10px;font-weight:700;letter-spacing:.02em}
+  .chip i{width:5px;height:5px;border-radius:50%;background:var(--accent);display:inline-block}
+  .top .spacer{flex:1}
+  .top .meta{font-size:11px;color:var(--text-muted);white-space:nowrap}
+  .hero{padding:70px 0 46px;max-width:780px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-text);margin-bottom:16px}
+  .eyebrow::before{content:"";width:24px;height:2px;background:var(--accent);border-radius:2px}
+  h1{font-family:var(--serif);font-size:58px;line-height:1.03;letter-spacing:-.035em;font-weight:700;margin-bottom:18px}
+  h1 em{color:var(--accent-text);font-style:normal}
+  .lede{font-family:var(--serif);font-size:21px;line-height:1.55;color:var(--text-2);max-width:700px;margin-bottom:22px}
+  .hero-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{display:inline-flex;align-items:center;height:26px;padding:0 10px;border:1px solid var(--border);border-radius:999px;background:var(--surface);font-size:10.5px;font-weight:650;color:var(--text-muted)}
+  .pill.accent{background:var(--accent-soft);border-color:#F3CFC0;color:var(--accent-text)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:8px 0 46px}
+  .card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;box-shadow:var(--sh);text-decoration:none;color:inherit;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;min-height:210px}
+  .card:hover{transform:translateY(-3px);box-shadow:var(--sh2);border-color:#D6CBB8;color:inherit}
+  .card .k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text);margin-bottom:8px}
+  .card h2{font-size:20px;letter-spacing:-.02em;margin-bottom:6px}
+  .card p{font-size:13.5px;line-height:1.55;color:var(--text-2);margin-bottom:14px}
+  .card .go{margin-top:auto;font-size:11.5px;font-weight:700;color:var(--accent-text)}
+  .card .tag{display:inline-flex;align-self:flex-start;height:21px;align-items:center;padding:0 7px;border-radius:5px;background:var(--surface-2);color:var(--text-muted);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+  .section-head{display:flex;align-items:baseline;gap:12px;margin:0 0 14px}
+  .section-head h2{font-size:15px;font-weight:700;letter-spacing:-.01em}
+  .section-head span{font-size:11px;color:var(--text-muted)}
+  .note{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin:0 0 40px;font-size:12px;line-height:1.55;color:var(--text-2)}
+  .note b{color:var(--text)}
+  footer{border-top:1px solid var(--border);padding:24px 0 42px;margin-top:10px}
+  .fbrand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .fbrand .mark{width:28px;height:28px;border-radius:7px;font-size:10px}
+  .fbrand b{font-size:13px;display:block;line-height:1.2}
+  .fbrand span{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent-text);display:block;margin-top:2px}
+  .prop{padding:11px 13px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:10.5px;line-height:1.55;color:var(--text-2);margin-bottom:10px}
+  .prop b{color:var(--text)}
+  footer .fine{font-size:10px;color:var(--text-muted);line-height:1.55}
+  @media (max-width:760px){
+    .hero{padding:48px 0 32px}
+    h1{font-size:42px}
+    .lede{font-size:19px}
+    .grid{grid-template-columns:1fr}
+    .top .meta{display:none}
+  }
+  @media (max-width:480px){
+    .wrap{padding:0 18px}
+    h1{font-size:36px}
+    .brand{font-size:15px}
+    .chip{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="mark">AS</span>
+    <div class="brand">Avensar <span>Signal</span></div>
+    <span class="chip"><i></i>An Avensar product</span>
+    <span class="spacer"></span>
+    <span class="meta">Private demo · 10 Nov 2026</span>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Public conversation intelligence</div>
+    <h1>See the story <em>before</em> it becomes the story.</h1>
+    <p class="lede">Avensar Signal reads public conversation across platforms and turns it into narrative, stance and amplification intelligence — with every number sourced, every gap labelled, and no invented data.</p>
+    <div class="hero-chips">
+      <span class="pill accent">India-first · 9 languages + Hinglish</span>
+      <span class="pill">Aggregate-first</span>
+      <span class="pill">Source-backed</span>
+      <span class="pill">No voter profiling</span>
+    </div>
+  </section>
+
+  <div class="grid">
+    <a class="card" href="dashboard/">
+      <span class="tag">Live demo</span>
+      <div class="k">01 · Monitor</div>
+      <h2>Social Monitor</h2>
+      <p>A fetched snapshot of public activity across Instagram, X, Telegram and YouTube — profile metrics, posts, messages and videos, with the collection log attached.</p>
+      <span class="go">Open the monitor →</span>
+    </a>
+    <a class="card" href="data-costs.html">
+      <span class="tag">Plan</span>
+      <div class="k">02 · Data</div>
+      <h2>Data &amp; cost plan</h2>
+      <p>What data the product needs, where each dataset comes from, the legal route for each platform, and what it costs at lean, pilot and campaign scale.</p>
+      <span class="go">Open the plan →</span>
+    </a>
+    <a class="card" href="explained.html">
+      <span class="tag">Product</span>
+      <div class="k">03 · Explainer</div>
+      <h2>Product explainer</h2>
+      <p>The full 13-step walkthrough: the product, the data, the decisions, the dashboard, the law, the costs and the honest limits.</p>
+      <span class="go">Read the explainer →</span>
+    </a>
+    <a class="card" href="demo/">
+      <span class="tag">Prototype</span>
+      <div class="k">04 · Dashboard</div>
+      <h2>Dashboard demo</h2>
+      <p>The interactive Avensar Signal dashboard prototype: overview, live radar, topic explorer, narratives, entities, alerts and reports.</p>
+      <span class="go">Open the demo →</span>
+    </a>
+  </div>
+
+  <div class="note"><b>Note on the demo.</b> The dashboard demo uses synthetic data and fictional entities. The CJP monitor uses public data captured on 5 November 2026. Neither is a poll, a forecast, or a claim about what voters think.</div>
+
+  <footer>
+    <div class="fbrand">
+      <span class="mark">AS</span>
+      <div><b>Avensar Signal</b><span>An Avensar product</span></div>
+    </div>
+    <div class="prop"><b>Proprietary &amp; confidential.</b> © 2026 Avensar. All rights reserved. Avensar and Avensar Signal are proprietary marks of Avensar. This product, its design system, data model, analysis logic, dashboard and source code are confidential and proprietary. No part may be copied, reproduced, distributed, sublicensed or used to build a competing product without prior written permission.</div>
+    <p class="fine">Avensar · Pune, Maharashtra, India · ops@avensar.com · avensar.com</p>
+  </footer>
+</div>
+</body>
+</html>
+

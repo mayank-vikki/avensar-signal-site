@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light" />
+<title>Avensar Signal — Explained, Step by Step</title>
+<style>
+  /* ============================ Avensar Signal design tokens (LIGHT only, D13) ============ */
+  :root{
+    --bg:#FAF9F5; --surface:#FFFFFF; --surface-2:#F3F0E8; --surface-3:#EAE5D9;
+    --border:#E4DFD3; --border-strong:#8C8678;
+    --text:#1F1E1B; --text-2:#55514A; --text-muted:#6B665C;
+    --accent:#DA7756; --accent-strong:#C15F3C; --accent-text:#A8482A; --accent-hover:#B9532F; --accent-soft:#FBEAE3;
+    --on-accent:#1F1E1B;
+    --ok:#1E7B55; --ok-bg:#E6F3EC; --info:#1F6FB5; --info-bg:#E8F1FA;
+    --warn:#8A5A00; --warn-bg:#FFF3D6; --danger:#B3261E; --danger-bg:#FBE9E7;
+    --embargo:#5B2A86; --embargo-bg:#F1E8F8;
+    --sent-pos:#1F6FB5; --sent-neg:#B3261E;
+    --font:Inter,"Segoe UI",system-ui,-apple-system,"Noto Sans Devanagari","Nirmala UI","Noto Sans",Roboto,sans-serif;
+    --serif:"Iowan Old Style","Palatino Linotype",Charter,Georgia,"Noto Serif Devanagari","Nirmala UI",serif;
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+    --r:14px; --r-sm:9px;
+    --sh1:0 1px 2px rgba(31,30,27,.05),0 1px 1px rgba(31,30,27,.03);
+    --sh2:0 8px 24px -8px rgba(31,30,27,.14),0 2px 6px rgba(31,30,27,.05);
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px;
+    --nav-w:264px; --top-h:58px;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; -webkit-text-size-adjust:100%}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} *{animation:none!important; transition:none!important} }
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,p{margin:0}
+  a{color:var(--accent-text);text-underline-offset:2px}
+  :focus-visible{outline:2px solid #1F6FB5;outline-offset:2px;border-radius:6px}
+  .mono{font-family:var(--mono);font-size:.86em}
+  .num{font-variant-numeric:tabular-nums}
+  .muted{color:var(--text-muted)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* ============================ Top bar ============================================== */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;height:var(--top-h);z-index:50;
+    display:flex;align-items:center;gap:var(--sp-3);
+    padding:0 var(--sp-5);
+    background:rgba(250,249,245,.9);backdrop-filter:saturate(1.1) blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .wordmark{display:flex;align-items:baseline;gap:var(--sp-2);font-weight:600;font-size:17px;letter-spacing:-.01em}
+  .wordmark .nd{color:var(--accent-text)}
+  .wordmark .dev{font-family:var(--serif);color:var(--text-muted);font-weight:400}
+  .topbar .spacer{flex:1}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 11px;border-radius:999px;
+    background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text-2)}
+  .status-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--warn)}
+  .progress-pill{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 11px;border-radius:999px;
+    background:var(--accent-soft);color:var(--accent-text);font-size:12px;font-weight:600;border:1px solid transparent}
+
+  /* ============================ Progress bar ========================================= */
+  .readbar{position:fixed;top:var(--top-h);left:0;right:0;height:3px;background:transparent;z-index:51}
+  .readbar span{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+
+  /* ============================ Layout ============================================== */
+  .layout{display:grid;grid-template-columns:var(--nav-w) 1fr;max-width:1200px;margin:0 auto;padding-top:var(--top-h)}
+  .sidebar{position:sticky;top:calc(var(--top-h) + 3px);align-self:start;height:calc(100vh - var(--top-h) - 3px);
+    overflow-y:auto;padding:var(--sp-5) var(--sp-4) var(--sp-7);border-right:1px solid var(--border)}
+  .sidebar .toc-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin:0 0 var(--sp-3) var(--sp-2)}
+  .toc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+  .toc a{display:flex;align-items:center;gap:var(--sp-2);padding:8px 10px;border-radius:var(--r-sm);
+    color:var(--text-2);text-decoration:none;font-size:13.5px;line-height:1.35;border:1px solid transparent}
+  .toc a .idx{font-family:var(--mono);font-size:11px;color:var(--text-muted);min-width:20px;text-align:right}
+  .toc a:hover{background:var(--surface-2);color:var(--text)}
+  .toc a.done .idx{color:var(--ok)}
+  .toc a.active{background:var(--accent-soft);border-color:#F3CFC0;color:var(--accent-text);font-weight:600}
+  .toc a.active .idx{color:var(--accent-text)}
+  .toc a.coming{color:var(--text-muted)}
+  .toc a.coming::after{content:"—";margin-left:auto;opacity:.5}
+
+  /* ============================ Main content ======================================== */
+  main{padding:var(--sp-6) var(--sp-7) var(--sp-7);min-width:0}
+  .wrap{max-width:760px}
+
+  /* Hero */
+  .hero{padding:var(--sp-6) 0 var(--sp-5)}
+  .eyebrow{display:inline-flex;align-items:center;gap:var(--sp-2);font-size:12px;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--accent-text);margin-bottom:var(--sp-4)}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--accent);border-radius:2px}
+  .hero h1{font-size:40px;line-height:1.08;font-weight:650;letter-spacing:-.02em;margin-bottom:var(--sp-4)}
+  .hero h1 .accent{color:var(--accent-text)}
+  .lede{font-family:var(--serif);font-size:21px;line-height:1.55;color:var(--text-2);max-width:660px;margin-bottom:var(--sp-5)}
+  .hero-chips{display:flex;flex-wrap:wrap;gap:var(--sp-2)}
+
+  .chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 11px;border-radius:999px;
+    font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text-2)}
+  .chip.mono-tag{font-family:var(--mono);font-size:11.5px;color:var(--text-2)}
+  .chip.ok{background:var(--ok-bg);border-color:#CBE5D6;color:var(--ok)}
+  .chip.warn{background:var(--warn-bg);border-color:#F0DEAC;color:var(--warn)}
+  .chip.danger{background:var(--danger-bg);border-color:#F2CCC8;color:var(--danger)}
+  .chip.embargo{background:var(--embargo-bg);border-color:#DDD0EC;color:var(--embargo)}
+  .chip.accent{background:var(--accent-soft);border-color:#F3CFC0;color:var(--accent-text)}
+
+  /* Section headings */
+  .block{margin-top:var(--sp-7)}
+  .block h2{font-size:24px;font-weight:650;letter-spacing:-.01em;margin-bottom:var(--sp-2)}
+  .block h3{font-size:17px;font-weight:650;margin:var(--sp-5) 0 var(--sp-2)}
+  .block h4{font-size:15px;font-weight:650;margin:var(--sp-4) 0 var(--sp-2)}
+  .block p{margin-bottom:var(--sp-3);color:var(--text-2)}
+  .block p strong, .block li strong{color:var(--text)}
+  .block ul, .block ol{margin:0 0 var(--sp-4);padding-left:22px}
+  .block li{margin-bottom:var(--sp-2);color:var(--text-2)}
+  .block li::marker{color:var(--accent-text)}
+
+  /* Picture-in-one-picture (clipping service analogy) */
+  .analogy{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);
+    border-radius:var(--r);padding:var(--sp-5);box-shadow:var(--sh1)}
+  .analogy p{margin:0;font-size:17px;line-height:1.6;color:var(--text)}
+  .analogy p + p{margin-top:var(--sp-3)}
+  .analogy .quote{font-family:var(--serif);font-size:18px;color:var(--text-2);font-style:italic}
+
+  /* Pipeline */
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-3);margin:var(--sp-4) 0}
+  .pipe-step{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--sp-4);box-shadow:var(--sh1);position:relative}
+  .pipe-step .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;
+    background:var(--accent-soft);color:var(--accent-text);font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:var(--sp-2)}
+  .pipe-step .t{font-weight:650;font-size:14.5px;margin-bottom:4px}
+  .pipe-step .d{font-size:12.5px;line-height:1.45;color:var(--text-muted)}
+  .pipe-step::after{content:"→";position:absolute;top:50%;right:-15px;transform:translateY(-50%);color:var(--accent-text);font-size:18px;font-weight:700}
+  .pipe-step:last-child::after{content:none}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--sp-5);box-shadow:var(--sh1)}
+  .card + .card{margin-top:var(--sp-4)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)}
+
+  /* Tables */
+  .tablewrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh1);margin:var(--sp-3) 0 var(--sp-5)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{background:var(--surface-2);color:var(--text);text-align:left;font-weight:600;font-size:12px;letter-spacing:.02em;
+    padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+  tbody td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text-2);line-height:1.5}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:var(--surface-2)}
+  td.nowrap{white-space:nowrap}
+  td .lead{color:var(--text);font-weight:600}
+  td small{display:block;color:var(--text-muted);font-size:12px;margin-top:2px}
+
+  /* Callouts */
+  .callout{border-radius:var(--r);padding:var(--sp-4) var(--sp-5);margin:var(--sp-4) 0;border:1px solid var(--border);border-left-width:4px}
+  .callout .ct{font-weight:650;font-size:14px;margin-bottom:var(--sp-1);display:flex;align-items:center;gap:var(--sp-2)}
+  .callout p{color:var(--text-2);font-size:14px;margin:0}
+  .callout p + p{margin-top:var(--sp-2)}
+  .callout.info{background:var(--info-bg);border-left-color:var(--info)}
+  .callout.info .ct{color:var(--info)}
+  .callout.warn{background:var(--warn-bg);border-left-color:#C98A1B}
+  .callout.warn .ct{color:var(--warn)}
+  .callout.danger{background:var(--danger-bg);border-left-color:var(--danger)}
+  .callout.danger .ct{color:var(--danger)}
+  .callout.embargo{background:var(--embargo-bg);border-left-color:var(--embargo)}
+  .callout.embargo .ct{color:var(--embargo)}
+  .callout.accent{background:var(--accent-soft);border-left-color:var(--accent)}
+  .callout.accent .ct{color:var(--accent-text)}
+
+  /* Correction entry (Step 2) */
+  .corr-group{margin-top:var(--sp-5)}
+  .corr-group > h4{display:flex;align-items:center;gap:var(--sp-2)}
+  .corr-group > h4 .g{font-family:var(--mono);font-size:12px;color:var(--accent-text);background:var(--accent-soft);
+    border-radius:6px;padding:2px 8px;font-weight:700}
+  .corr{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:var(--sp-3);background:var(--surface);box-shadow:var(--sh1)}
+  .corr-head{display:flex;align-items:center;gap:var(--sp-2);padding:10px 16px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+  .corr-head .id{font-family:var(--mono);font-weight:700;font-size:12.5px;color:var(--accent-text);background:var(--accent-soft);
+    border-radius:6px;padding:1px 7px}
+  .corr-head .title{font-weight:650;font-size:14px}
+  .corr-body{padding:12px 16px;display:grid;grid-template-columns:1fr;gap:8px}
+  .corr-body .row{display:grid;grid-template-columns:112px 1fr;gap:12px;font-size:13.5px}
+  .corr-body .row .k{color:var(--text-muted);font-weight:600;font-size:12px;padding-top:1px}
+  .corr-body .row .v{color:var(--text-2)}
+  .corr-body .row .v strong{color:var(--text)}
+  .corr-body .row .v .sostr{display:inline-block;margin-top:4px;font-size:12.5px;color:var(--ok);background:var(--ok-bg);
+    border-radius:6px;padding:2px 8px;font-weight:600}
+
+  /* Decision cards (Step 3) */
+  .dec{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:var(--sp-2);background:var(--surface);box-shadow:var(--sh1)}
+  .dec-head{display:flex;align-items:baseline;gap:var(--sp-2);padding:9px 14px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+  .dec-head .id{font-family:var(--mono);font-weight:700;font-size:12.5px;color:var(--accent-text);background:var(--accent-soft);border-radius:6px;padding:1px 7px;white-space:nowrap}
+  .dec-head .title{font-weight:650;font-size:14px;color:var(--text)}
+  .dec-body{padding:10px 14px;font-size:13.5px;color:var(--text-2);line-height:1.55}
+  .takeaway{margin:2px 0 var(--sp-4);font-size:13px;color:var(--text-2);padding-left:var(--sp-3);border-left:2px solid var(--accent);font-style:italic}
+  .takeaway strong{color:var(--text)}
+
+  /* Step sections */
+  .step{margin-top:var(--sp-7);scroll-margin-top:calc(var(--top-h) + 24px);border-top:1px solid var(--border);padding-top:var(--sp-6)}
+  .step-head{margin-bottom:var(--sp-5)}
+  .step-head .kicker{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);margin-bottom:var(--sp-2)}
+  .step-head h2{font-size:30px;font-weight:650;letter-spacing:-.02em;line-height:1.15;margin-bottom:var(--sp-3)}
+  .step-head .spec{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--sp-2)}
+  .step-head .meta{margin-top:var(--sp-3);font-size:13px;color:var(--text-muted)}
+
+  .pager{display:flex;justify-content:space-between;gap:var(--sp-3);margin-top:var(--sp-6);padding-top:var(--sp-5);border-top:1px solid var(--border)}
+  .pager a{display:flex;flex-direction:column;gap:2px;text-decoration:none;padding:var(--sp-3) var(--sp-4);
+    border:1px solid var(--border);border-radius:var(--r);background:var(--surface);box-shadow:var(--sh1);max-width:48%}
+  .pager a .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+  .pager a .ttl{font-size:14px;font-weight:600;color:var(--text)}
+  .pager a:hover{border-color:var(--accent);color:var(--accent-text)}
+  .pager a.next{margin-left:auto;text-align:right}
+  .pager a.disabled{opacity:.4;pointer-events:none}
+
+  /* Footer */
+  footer{margin-top:var(--sp-7);padding:var(--sp-6) 0;border-top:1px solid var(--border);font-size:13px;color:var(--text-muted)}
+  footer p{margin-bottom:var(--sp-2)}
+
+  /* ============================ Responsive ========================================== */
+  @media (max-width: 900px){
+    .layout{grid-template-columns:1fr}
+    .sidebar{display:none}
+    main{padding:var(--sp-5)}
+    .pipeline{grid-template-columns:1fr}
+    .pipe-step::after{content:"";display:none}
+    .pipe-step{display:flex;gap:var(--sp-3);align-items:flex-start}
+    .grid2{grid-template-columns:1fr}
+    .corr-body .row{grid-template-columns:1fr;gap:2px}
+    .hero h1{font-size:32px}
+    .lede{font-size:18px}
+    .topbar .progress-pill{display:none}
+  }
+  @media print{
+    .topbar,.readbar,.sidebar,.pager{display:none!important}
+    .layout{display:block;padding-top:0;max-width:none}
+    main{padding:0}
+    body{background:#fff}
+    .step{border-top:none}
+    .card,.tablewrap,.corr,.analogy,.callout{box-shadow:none;break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<a class="sr" href="#main">Skip to content</a>
+
+<!-- ============================ Top bar ============================================== -->
+<header class="topbar">
+  <div class="wordmark"><span class="nd">Avensar Signal</span><span class="dev">· explained</span></div>
+  <span class="status-pill" style="background:var(--ink);border-color:var(--ink);color:#F3F0E8"><span class="dot" style="background:var(--accent)"></span> An Avensar product</span>
+  <span class="status-pill"><span class="dot"></span> Planning + clickable demo only · no production code yet</span>
+  <div class="spacer"></div>
+  <span class="progress-pill">Complete · 13 of 13 steps</span>
+</header>
+<div class="readbar" aria-hidden="true"><span id="readbar-fill"></span></div>
+
+<div class="layout">
+  <!-- ============================ Sidebar TOC ======================================= -->
+  <nav class="sidebar" aria-label="Steps">
+    <div class="toc-label">The 13 steps</div>
+    <ul class="toc" id="toc">
+      <li><a href="#vision" class="done" data-sec="vision"><span class="idx">◆</span>Overview &amp; vision</a></li>
+      <li><a href="#steps" data-sec="steps"><span class="idx">▦</span>The 13 steps at a glance</a></li>
+      <li><a href="#step-1" class="done" data-sec="step-1"><span class="idx">01</span>What we are building &amp; why it can work</a></li>
+      <li><a href="#step-2" class="done" data-sec="step-2"><span class="idx">02</span>The 15 corrections (P1–P15)</a></li>
+      <li><a href="#step-3" class="done" data-sec="step-3"><span class="idx">03</span>The 36 decisions (D1–D36)</a></li>
+      <li><a href="#step-4" class="done" data-sec="step-4"><span class="idx">04</span>Who uses it &amp; what it does</a></li>
+      <li><a href="#step-5" class="done" data-sec="step-5"><span class="idx">05</span>Architecture — how data flows</a></li>
+      <li><a href="#step-6" class="done" data-sec="step-6"><span class="idx">06</span>Where data comes from</a></li>
+      <li><a href="#step-7" class="done" data-sec="step-7"><span class="idx">07</span>How the AI reads it</a></li>
+      <li><a href="#step-8" class="done" data-sec="step-8"><span class="idx">08</span>Where it is stored</a></li>
+      <li><a href="#step-9" class="done" data-sec="step-9"><span class="idx">09</span>What we compute &amp; show</a></li>
+      <li><a href="#step-10" class="done" data-sec="step-10"><span class="idx">10</span>Alerts &amp; reports</a></li>
+      <li><a href="#step-11" class="done" data-sec="step-11"><span class="idx">11</span>Law, ethics &amp; security</a></li>
+      <li><a href="#step-12" class="done" data-sec="step-12"><span class="idx">12</span>Running &amp; building it</a></li>
+      <li><a href="#step-13" class="done" data-sec="step-13"><span class="idx">13</span>Selling, piloting &amp; open items</a></li>
+    </ul>
+  </nav>
+
+  <!-- ============================ Main ============================================== -->
+  <main id="main">
+    <div class="wrap">
+
+      <!-- ============================ OVERVIEW & VISION =============================== -->
+      <section id="vision" class="hero">
+        <span class="eyebrow">Plain-English walkthrough</span>
+        <h1>Avensar Signal, <span class="accent">explained</span>.</h1>
+        <p class="lede">An AI-powered social-listening intelligence service for India — it reads public talk in nine languages plus Hinglish, tells political teams and brands what is rising and how sure we are, and puts a named human analyst behind every number.</p>
+        <div class="hero-chips">
+          <span class="chip">Hindi · English · Hinglish · +7 regional languages</span>
+          <span class="chip">Aggregate-first · never individuals</span>
+          <span class="chip">Analyst-reviewed briefs</span>
+          <span class="chip warn">Working name — trademark pending</span>
+          <span class="chip danger">No code run yet — [UNVERIFIED] claims</span>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>The product in one picture</h2>
+        <div class="analogy">
+          <p>Think of a <strong>newsroom clipping service with a smart analyst on staff</strong>. A clipping service reads every paper and hands you the relevant cuttings. Avensar Signal does that for public online talk in India — X, YouTube, news sites, and later Threads and a short Instagram/Facebook watchlist. An AI reads each post once; a human analyst then reads the machine output and writes a one-page morning brief.</p>
+          <p class="quote">"We sell an answer, not a login."</p>
+        </div>
+
+        <h3>The five parts, in plain words</h3>
+        <div class="pipeline">
+          <div class="pipe-step"><span class="n">1</span><div class="t">Collect</div><div class="d">Pull public posts &amp; comments from several sources into one common format.</div></div>
+          <div class="pipe-step"><span class="n">2</span><div class="t">Read</div><div class="d">One AI pass per post: language, feeling toward each named party, sarcasm, topic.</div></div>
+          <div class="pipe-step"><span class="n">3</span><div class="t">Group</div><div class="d">Report groups, topics and coordinated clusters — never one named person's belief.</div></div>
+          <div class="pipe-step"><span class="n">4</span><div class="t">Show</div><div class="d">A light-theme dashboard plus a daily brief at 07:00 IST; every number carries a quality tag.</div></div>
+          <div class="pipe-step"><span class="n">5</span><div class="t">Human check</div><div class="d">A named analyst reviews uncertain items and approves the brief before the client sees it.</div></div>
+        </div>
+
+        <p class="muted" style="font-size:13px">This is the core loop. Every later step is one slice of these five parts — where data comes from, how the AI reads, how it is stored, what we show, how it is built, and how it is sold.</p>
+      </section>
+
+      <!-- ============================ 13 STEPS TABLE ================================= -->
+      <section id="steps" class="block" style="scroll-margin-top:calc(var(--top-h) + 24px)">
+        <h2>The 13 steps at a glance</h2>
+        <p>This document walks the whole project in 13 steps. Two are written so far; the rest will be filled in as we confirm each one.</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>#</th><th>Step</th><th>What you will learn</th><th>Spec files</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="nowrap"><span class="mono">01</span></td><td class="lead">What we are building &amp; why it can work</td><td>The vision, who pays, the business model, costs, what it is <em>not</em>, and the biggest risks.</td><td class="mono nowrap">00 · 16 §1–3</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">02</span></td><td class="lead">The 15 corrections (P1–P15)</td><td>Where the original guides were wrong, and the concrete change each one forced.</td><td class="mono nowrap">16 §1</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">03</span></td><td>The 36 decisions (D1–D36)</td><td>The rules that govern everything — data, AI, retention, ethics, budget.</td><td class="mono nowrap">16 §2</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">04</span></td><td>Who uses it &amp; what it does</td><td>The personas, the 16 features (F1–F16), and what is in vs. out of the MVP.</td><td class="mono nowrap">01 · 27</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">05</span></td><td>Architecture — how data flows</td><td>The one-page picture: sources → clean → AI-read → analyze → dashboard/briefs.</td><td class="mono nowrap">02</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">06</span></td><td>Where data comes from</td><td>Each source, how to get maximum legitimate data, the pipeline, seed lists.</td><td class="mono nowrap">13 · 03 · 25</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">07</span></td><td>How the AI reads it</td><td>Language ID, the one LLM call, entities, topics, coordination, accuracy gates.</td><td class="mono nowrap">04 · 17</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">08</span></td><td>Where it is stored</td><td>Database tables, retention (raw text deleted on schedule), the personal-data map.</td><td class="mono nowrap">05 · 24 · 21</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">09</span></td><td>What we compute &amp; show</td><td>Every analysis and chart, the dashboard pages, the design and quality badges.</td><td class="mono nowrap">12 · 06 · 14</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">10</span></td><td>Alerts &amp; reports</td><td>When an alert fires, the daily brief + weekly report, the approval flow.</td><td class="mono nowrap">07</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">11</span></td><td>Law, ethics &amp; security</td><td>DPDP, election law, the ethical charter, and the operating rules.</td><td class="mono nowrap">08 · 19</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">12</span></td><td>Running &amp; building it</td><td>Hosting, vendor APIs, testing, accounts &amp; keys, agent workflow, cost tracking.</td><td class="mono nowrap">09 · 10 · 15 · 26 · 29 · 11</td><td><span class="chip ok">Written</span></td></tr>
+              <tr><td class="nowrap"><span class="mono">13</span></td><td>Selling, piloting &amp; open items</td><td>Buyers, competitors, pricing, the pilot offer, the concierge kit, the audit.</td><td class="mono nowrap">18 · 28 · 20</td><td><span class="chip ok">Written</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:12.5px">Steps 03–13 are a proposed order, derived from the repo's own reading order (<span class="mono">MVP/00</span> and <span class="mono">MVP/22</span>). We'll confirm each title as we reach it.</p>
+      </section>
+
+      <!-- ============================ STEP 1 ========================================= -->
+      <section id="step-1" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 1 of 13</div>
+          <h2>What we are building, and why it can work</h2>
+          <div class="spec">
+            <span class="chip mono-tag">00_MASTER_PLAN</span>
+            <span class="chip mono-tag">16 §1–3</span>
+            <span class="chip mono-tag">18 §2–5, 11</span>
+          </div>
+          <div class="meta">The vision, the buyers, the business model, the costs, and the honest caveats — everything on one page.</div>
+        </div>
+
+        <h3>The product in one picture</h3>
+        <div class="analogy">
+          <p>Think of a <strong>newsroom clipping service with a smart analyst on staff</strong>. A clipping service reads every paper and hands you the relevant cuttings. Avensar Signal does that for public online talk in India: X, YouTube, news sites, and later Threads and a short Instagram/Facebook watchlist. It reads Hindi, English, Hinglish and <strong>7 more languages</strong> (9 languages plus the Hinglish register). A human analyst then reads the machine output and writes a one-page morning brief.</p>
+        </div>
+
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th style="width:140px">Part</th><th>In plain words</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Collect</td><td>Pull public posts and comments from several sources into one common format.</td></tr>
+              <tr><td class="lead">Read</td><td>An AI reads each post once — language, the feeling toward each named party or brand, sarcasm, and topic.</td></tr>
+              <tr><td class="lead">Group</td><td>We report groups, topics and coordinated clusters. We never report what one named person believes.</td></tr>
+              <tr><td class="lead">Show</td><td>A light-theme dashboard (20 pages in the demo) plus a daily brief at 07:00 IST. Every number carries a quality tag.</td></tr>
+              <tr><td class="lead">Human check</td><td>A named analyst reviews uncertain items and approves the brief before the client sees it.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout accent">
+          <div class="ct">Example brief</div>
+          <p>"Negative talk about fuel prices rose 8 points this week, mostly in Punjabi and Hinglish, from about 1,900 distinct authors. Sarcasm is 12%, so read the range, not the midpoint. One cluster of 60 accounts posted near-identical text within 5 minutes."</p>
+        </div>
+
+        <h3>Who pays, and why</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Customer</th><th>Why they buy</th><th>Priority</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Political consultancies</td><td>They run field surveys but have thin software. We work behind their brand.</td><td class="nowrap"><span class="chip accent">Highest — best channel</span></td></tr>
+              <tr><td class="lead">PR agencies</td><td>Global tools cost too much and misread Hinglish. No election deadline.</td><td class="nowrap"><span class="chip accent">High</span></td></tr>
+              <tr><td class="lead">State party units</td><td>Their IT cell scrolls by hand and misses non-English posts.</td><td class="nowrap"><span class="chip warn">High — needs trust + a political advisor</span></td></tr>
+              <tr><td class="lead">Brands (direct)</td><td>Crisis alerts and share of voice in regional languages.</td><td class="nowrap"><span class="chip">Later — mostly via agencies</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout info">
+          <div class="ct">The pitch</div>
+          <p>"You can't read all of Hinglish and regional talk by hand, and you don't trust social-only numbers. We tell you what's rising, how sure we are, and a human stands behind it."</p>
+        </div>
+
+        <h3>Business model</h3>
+        <p>We sell an <strong>answer, not a login</strong> (decision D14). Indian buyers pay for trust and interpretation.</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Package</th><th>What's in it</th><th>Price idea <span style="font-weight:400">(all [UNVERIFIED])</span></th></tr></thead>
+            <tbody>
+              <tr><td class="lead">P1 — Dashboard</td><td>Seats, alerts, weekly brief.</td><td>₹25–60k / month</td></tr>
+              <tr><td class="lead">P2 — Managed</td><td>P1 plus named analyst, daily brief.</td><td>₹75k–1.5L (brand) · ₹1.5–3L (political)</td></tr>
+              <tr><td class="lead">P3 — Campaign</td><td>P2 plus election mode and survey overlay.</td><td>₹2–10L / month, 3–6 month minimum</td></tr>
+              <tr><td class="lead">P4 — Event report</td><td>One-off report on an event or crisis.</td><td>₹50k–2L</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn">
+          <div class="ct">Risk to the margin</div>
+          <p>Analyst hours can eat the profit. File 18 estimates gross margin of about <strong>21%</strong> (Tier S), <strong>33%</strong> (Tier M) and <strong>52%</strong> (Tier L).</p>
+        </div>
+        <p>Options we weighed: self-serve software, or a pure consultancy. We chose the <strong>hybrid</strong> — software alone is cheap to copy; consultancy alone doesn't scale.</p>
+
+        <h3>Costs — three sizes</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Tier</th><th>Posts / day</th><th>Monthly cost</th><th>Use</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">S</td><td>~15k</td><td>₹27–32k</td><td>Build and demos</td></tr>
+              <tr><td class="lead">M</td><td>~50k</td><td>₹55–70k</td><td>First pilot (default)</td></tr>
+              <tr><td class="lead">L</td><td>~200k</td><td>₹1.3–1.6 lakh</td><td>Campaign, billed to the client</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The original ₹35k/month figure only holds for Tier S. Annotation (~₹0.5–1.5L), legal (~₹0.5–1L) and analyst pay are extra.</p>
+
+        <h3>Why it can work</h3>
+        <ul>
+          <li><strong>Real gap.</strong> The market is consultancy-led with thin software. Global tools have no verified Indian-language depth. The closest political entrant (Rajyatantr "Arthashastra") sells voter profiling, which we refuse.</li>
+          <li><strong>Cheap data.</strong> X data from resellers costs about $150–200 per million posts, against about $5,000 officially.</li>
+          <li><strong>Cheap AI.</strong> One AI call per post costs roughly $4–17 per 100,000 posts. The real cost is the human labelling used to measure accuracy.</li>
+          <li><strong>A differentiator we can prove.</strong> We publish accuracy per language — but only after we measure it (week 7).</li>
+        </ul>
+
+        <h3>Corrections to the original guides (the short version)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Original claim</th><th>Reality</th><th>Effect</th></tr></thead>
+            <tbody>
+              <tr><td>X API costs ~$200/month</td><td>~$0.005 per post ≈ $7,500/month at pilot volume</td><td>We use unofficial resellers — a risk you must accept (decision 1)</td></tr>
+              <tr><td>YouTube text can be kept 90+ days</td><td>YouTube's rules allow 30 days maximum</td><td>Raw text is deleted on a per-source clock; scores are kept</td></tr>
+              <tr><td>EyesOver is a US firm partnered with Campaign Nucleus</td><td>It is Canadian, with no evidence of that partnership</td><td>Never repeat the partnership claim in sales material</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Step 2 covers all 15 corrections (P1–P15) in full.</p>
+
+        <h3>What it is <em>not</em></h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Not this</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">A vote predictor</td><td>Social posters are not the electorate, and election law restricts poll-like outputs.</td></tr>
+              <tr><td class="lead">A profiler of individuals or a bot-labeller</td><td>It reports clusters only (D1). Labelling a person risks platform bans, DPDP trouble and a scandal headline.</td></tr>
+              <tr><td class="lead">A poster, bot or fake-account tool</td><td>Never (D12). We only listen.</td></tr>
+              <tr><td class="lead">A WhatsApp monitor</td><td>WhatsApp isn't publicly monitorable. We see public spillover only.</td></tr>
+              <tr><td class="lead">A self-serve SaaS</td><td>The human analyst is part of the product.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout danger">
+          <div class="ct">Proven today</div>
+          <p>No vendor, database or model has been run yet. Every vendor, legal and price claim tagged [UNVERIFIED] is unchecked. A lawyer has not confirmed legality.</p>
+        </div>
+
+        <h3>Biggest risks</h3>
+        <ul>
+          <li><strong>Timing.</strong> A 12-week build ends mid-January 2027, after most Feb–Mar 2027 party contracts. So the first pilots run in <strong>concierge mode</strong> (partial machine plus analyst) from about week 6.</li>
+          <li><strong>Trust and access</strong> matter more than technology for political buyers.</li>
+          <li><strong>A client asking for voter profiling, and us not refusing, would end the plan.</strong></li>
+        </ul>
+
+        <div class="callout info">
+          <div class="ct">Verified against the specs</div>
+          <p>Every figure above (margins 21/33/52%, package prices, tier costs, X and AI costs) matches <span class="mono">MVP/16</span> and <span class="mono">MVP/18</span> exactly. One wording note: the language count is "9 languages + the Hinglish register" (10 classes), not "8 other languages".</p>
+        </div>
+
+        <div class="pager">
+          <a class="disabled" href="#vision"><span class="lbl">Previous</span><span class="ttl">Overview &amp; vision</span></a>
+          <a class="next" href="#step-2"><span class="lbl">Next · Step 2</span><span class="ttl">The 15 corrections (P1–P15)</span></a>
+        </div>
+      </section>
+
+      <!-- ============================ STEP 2 ========================================= -->
+      <section id="step-2" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 2 of 13</div>
+          <h2>The 15 corrections — what the original guides got wrong</h2>
+          <div class="spec">
+            <span class="chip mono-tag">16 §1</span>
+            <span class="chip mono-tag">research R1–R5</span>
+          </div>
+          <div class="meta">Fifteen places where the first drafts or the source guides were wrong — each one changed a concrete decision. Grouped into seven themes.</div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">A</span>The company we modelled ourselves on</h4>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P1</span><span class="title">EyesOver isn't American — it's Canadian</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">EyesOver is a US firm.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">Founded 2015 in Fredericton, <strong>Canada</strong> (a US arm only in 2025). What they really sell is <strong>managed services</strong> — "AI finds it, a human interprets it" — not a big self-serve product.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Analyst-in-the-loop is our model, not a login</span></span></div>
+            </div>
+          </div>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P2</span><span class="title">No Campaign Nucleus partnership</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">EyesOver partners with Campaign Nucleus.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v"><strong>No evidence found</strong> in any source.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Never repeat it in sales material</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">B</span>Getting data, and what it really costs</h4>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P3</span><span class="title">X (Twitter) data is far more expensive than we thought</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">X's API is ~$200/month.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">Since Feb 2026 X charges <strong>~$0.005 per post read</strong>. At ~1.5M posts/month that is <strong>~$7,500/month</strong>.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Official X is off the table at scale → use resellers (decision D3, needs your sign-off)</span></span></div>
+            </div>
+          </div>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P4</span><span class="title">The scraper we planned is wrong</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v"><span class="mono">apify/twitter-scraper</span> would work.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">It's a community actor, not first-party. The maintained alternative <strong>bans short-interval monitoring</strong> and needs a 50-tweet minimum.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Don't hard-code one scraper — rely on swappable resellers (D2/D3)</span></span></div>
+            </div>
+          </div>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P6</span><span class="title">Reddit isn't free for commercial use</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">The Reddit API is free.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">Commercial use is <strong>negotiated</strong> (~$0.24 per 1k, unverified).</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Reddit → Phase 2; get a real quote first</span></span></div>
+            </div>
+          </div>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P7</span><span class="title">Two handy libraries are dead</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v"><span class="mono">pygooglenews</span> and <span class="mono">pytrends</span> would work.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">Both are <strong>unmaintained/archived</strong>. Google News RSS still works (unofficial, ~100 items/feed).</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Use plain feedparser for News; Google Trends needs a paid vendor</span></span></div>
+            </div>
+          </div>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P12</span><span class="title">Scraping Meta (IG/Facebook) is riskier than we thought</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">"Low risk" via Apify.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">Logged-out scraping won in a <strong>US district court</strong> (Meta v Bright Data, 2024) — but that's <strong>US-only and still breaches Meta's terms</strong>. India is untested.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">IG/FB is a small watchlist only, never a firehose (D4)</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">C</span>How long we can keep data</h4>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P5</span><span class="title">YouTube raw text can only be kept 30 days</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">Keep raw YouTube text 90+ days.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">YouTube's rules allow <strong>max 30 days</strong> for public (non-authorized) data.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Delete raw text after 30 days; keep only derived scores (D6)</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">D</span>The AI brains we actually use</h4>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P8</span><span class="title">The "free" language detector isn't free for us</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v"><span class="mono">fastText</span> language ID was fine.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">The HuggingFace model is <strong>CC-BY-NC — non-commercial</strong>; we can't use it in a paid product.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Use IndicLID + script rules, and a Hinglish-specific detector (D8)</span></span></div>
+            </div>
+          </div>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P9</span><span class="title">The report-writing model name was outdated</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v"><span class="mono">gemini-2.0-flash</span>.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">It's superseded.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Use Gemini 2.5 Flash-Lite or Claude Haiku 5.5, via a provider-agnostic client (D7)</span></span></div>
+            </div>
+          </div>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P10</span><span class="title">English-only emotion/sarcasm models don't help India</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v"><span class="mono">j-hartmann</span> / <span class="mono">helinivan</span> would work.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">They are <strong>English-only</strong>; they'd fail on Hindi/Hinglish.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Emotion + sarcasm come from the one LLM JSON call (D7)</span></span></div>
+            </div>
+          </div>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P11</span><span class="title">IndicBERT isn't a ready-made sentiment tool</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">IndicBERTv2 is a sentiment model.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">It's a <strong>pretrained base</strong> — a starting point, not a finished tool; the ready-made sentiment heads are tiny and unaudited.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Fine-tune MuRIL/IndicBERT on our own labelled data only after the LLM-first MVP works (D7)</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">E</span>The law</h4>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P13</span><span class="title">The privacy law (DPDP) may bite sooner than planned</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">Full DPDP enforcement in May 2027.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">That baseline is right (rules notified Nov 2025), but the government has <strong>floated cutting the grace period to ~Nov 2026</strong> (unconfirmed).</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Build to the stricter, earlier date (D10)</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">F</span>Competition</h4>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P14</span><span class="title">Half the competitors we listed don't exist</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">PolitIQ, Nemi, Kanalytics, Rajtilak are competitors.</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v"><strong>Not found by any search.</strong> The real ones: Awshar AI, QuickMetrix, I-PAC, Polstrat, Rajyatantr "Arthashastra" (Aug 2025), Political Metrics, Vidooly — plus the global giants (Meltwater, Sprinklr, Brandwatch).</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">The only political entrant doing voter profiling is "Arthashastra" — exactly what we refuse</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">G</span>What's impossible</h4>
+
+          <div class="corr">
+            <div class="corr-head"><span class="id">P15</span><span class="title">WhatsApp stays out of reach</span></div>
+            <div class="corr-body">
+              <div class="row"><span class="k">We thought</span><span class="v">—</span></div>
+              <div class="row"><span class="k">Actually</span><span class="v">WhatsApp is private and encrypted, so it <strong>cannot be monitored</strong>.</span></div>
+              <div class="row"><span class="k">So now</span><span class="v"><span class="sostr">Only public spillover (Telegram, X, YouTube comments, fact-checker queues) is ever visible — permanently out of scope</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="ct">One-line takeaway</div>
+          <p>We were wrong about the model (P1–P2), the data costs and scrapers (P3–P7, P12), the AI tools (P8–P11), the legal clock (P13), and the competitor list (P14) — and WhatsApp was never possible (P15). Each one changed a concrete decision (mostly D3–D8 and D10), already baked into the plan.</p>
+        </div>
+
+        <div class="pager">
+          <a href="#step-1"><span class="lbl">Previous · Step 1</span><span class="ttl">What we are building &amp; why it can work</span></a>
+          <a class="next" href="#step-3"><span class="lbl">Next · Step 3</span><span class="ttl">The 36 decisions (D1–D36)</span></a>
+        </div>
+      </section>
+
+      <!-- ============================ STEPS 3–13 PLACEHOLDERS ========================= -->
+      <section id="step-3" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 3 of 13</div>
+          <h2>The 36 decisions (D1–D36)</h2>
+          <div class="spec">
+            <span class="chip mono-tag">16 §2</span>
+            <span class="chip mono-tag">source of truth</span>
+          </div>
+          <div class="meta">File 16 §2 is the <strong>source of truth</strong> — every other spec file must obey these. Each decision has an ID (D1, D2…) referenced in code and PRs. Grouped into seven themes. (D24 is a stub pointing to D26, so there are 35 real decisions.)</div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">1</span>Red lines — what we will never do</h4>
+          <div class="dec"><div class="dec-head"><span class="id">D1</span><span class="title">Aggregate-first</span></div><div class="dec-body">We report groups, topics and clusters — never what one named person believes, never someone's religion/caste/leaning. Author handles are always scrambled. We detect "coordinated posting", but we never say "this person is a bot".</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D11</span><span class="title">Election embargo</span></div><div class="dec-body">During the 48-hour silence period before polls (and exit-poll windows) we lock anything publishable. A client's internal dashboard stays on; anything public-facing is blocked. We never call our output an "opinion poll".</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D12</span><span class="title">No posting, no bots, ever</span></div><div class="dec-body">We only listen. If we ever generate content for a client, it must be labelled AI-generated and cleared through their pre-certification process.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D14</span><span class="title">The human analyst is the product</span></div><div class="dec-body">The MVP ships with an analyst workflow (review queue + annotated daily brief), not just a self-serve dashboard. This is what buyers actually pay for.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D36</span><span class="title">Word analytics stay aggregate too</span></div><div class="dec-body">When we show "what words people use", segments are of posts/conversations, never of people; a word appears only if at least 5 distinct authors used it; exports never include handles.</div></div>
+          <div class="takeaway"><strong>Takeaway:</strong> we listen, we never profile, never post, and a human stands behind everything.</div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">2</span>Where the data comes from</h4>
+          <div class="dec"><div class="dec-head"><span class="id">D2</span><span class="title">Every source is a swappable plug-in</span></div><div class="dec-body">Each platform is a separate adapter that returns the same common format. No business logic depends on one vendor — so when a vendor breaks, we swap it without touching anything else.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D3</span><span class="title">X data via resellers</span></div><div class="dec-body">twitterapi.io (primary) + SocialData.tools (fallback), because official X is ~$5,000/1M posts vs ~$150–200/1M. This is the one risk you must personally accept (founder decision #1).</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D4</span><span class="title">Instagram/Facebook = watchlist only</span></div><div class="dec-body">We follow a curated list of ~100–300 public accounts/pages — not a hashtag firehose (too risky and costly). For a client's own pages we use their authorized API.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D5</span><span class="title">Threads keyword search is Phase 1</span></div><div class="dec-body">Official and free (2,200 queries/day), and where Gen-Z talk lives.</div></div>
+          <div class="takeaway"><strong>Takeaway:</strong> cheap, swappable, and conservative — no firehose scraping where it's risky.</div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">3</span>How the AI reads each post</h4>
+          <div class="dec"><div class="dec-head"><span class="id">D7</span><span class="title">LLM-first</span></div><div class="dec-body">One structured AI call per post returns language, sentiment toward each named target, emotion, sarcasm flag, entities and topic. Cheap batch model first; escalate the ~15% that are sarcastic/code-mixed/low-confidence to a stronger model. Only after 3–5k hand-labelled examples per language do we distil into a smaller fine-tuned model.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D8</span><span class="title">Language detection</span></div><div class="dec-body">Script rules first, then IndicLID, then a Hinglish-specific detector. (We can't use the popular fastText — it's non-commercial.)</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D17</span><span class="title">Vernacular video/audio is Phase 2</span></div><div class="dec-body">Reels/Shorts carry most Bharat discourse, but understanding speech (ASR) is deferred — it's a future differentiator.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D19</span><span class="title">Language scope = 10 classes</span></div><div class="dec-body">9 languages (Hindi, English, Marathi, Tamil, Telugu, Bengali, Kannada, Gujarati, Punjabi) + the Hinglish register, each with its own test set and gate. Malayalam deferred.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D20</span><span class="title">Gold-set rules</span></div><div class="dec-body">Our hand-labelled evaluation examples keep text but strip handles; they're only for measuring/tuning, never resold, never used to train foundation models.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D26</span><span class="title">Emotion = 7 labels</span></div><div class="dec-body">anger, fear, hope/joy, trust, sadness, surprise, none. (disgust/contempt fold into anger; joy folds into hope/joy.) Fewer labels = safer, since humans barely agree on fine-grained emotions.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D27</span><span class="title">Accuracy gates in one place</span></div><div class="dec-body">File 17 §14.2 is the single home of per-language GREEN/AMBER/RED targets. A language goes live for clients only when it's GREEN.</div></div>
+          <div class="takeaway"><strong>Takeaway:</strong> one AI pass per post, 10 language classes, and we only claim accuracy we've measured.</div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">4</span>Where data lives, and how long</h4>
+          <div class="dec"><div class="dec-head"><span class="id">D6</span><span class="title">Retention per source</span></div><div class="dec-body">YouTube raw text deleted after 30 days; others after 90 days. The scores we derived (no raw text) are kept forever. We honour deletion requests.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D9</span><span class="title">Boring, cheap database</span></div><div class="dec-body">PostgreSQL + TimescaleDB + pgvector + Redis. Elasticsearch is deferred (saves ~₹5k/month and one service to run).</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D10</span><span class="title">Privacy built to the strict date</span></div><div class="dec-body">We follow the DPDP data-protection law as if fully in force from Nov 2026 — data map, 72-hour breach reporting, 1-year logs, grievance contact, processor agreement.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D25</span><span class="title">Store each post once, globally</span></div><div class="dec-body">Public posts are collected and stored once (not once per client) — this is what makes the whole thing affordable. One shared key scrambles all author handles. Clients never see the hashes.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D29</span><span class="title">How deletion actually works</span></div><div class="dec-body">Every post gets an expiry timestamp at insert; a purge job deletes expired raw text and every fragment of it (mentions, embeddings, search index) on schedule.</div></div>
+          <div class="takeaway"><strong>Takeaway:</strong> raw text is short-lived and scrubbed; only anonymous scores persist.</div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">5</span>What the client sees</h4>
+          <div class="dec"><div class="dec-head"><span class="id">D13</span><span class="title">Light theme only</span></div><div class="dec-body">The dashboard is light (warm off-white, orange #DA7756 accent) — a founder rule, and more readable for non-technical clients.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D16</span><span class="title">Ground-survey overlay</span></div><div class="dec-body">Clients can upload their own field/survey data and overlay it on our social signals — because savvy political buyers distrust social-only numbers.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D18</span><span class="title">Every number carries a quality tag</span></div><div class="dec-body">Sample size, language reliability, coordination share, sarcasm share — so the client always knows how much to trust a figure.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D21</span><span class="title">Approval policy</span></div><div class="dec-body">Crisis and data-gap alerts are template-only and can skip review (speed matters). Daily briefs auto-approve only if the client opts in. Weekly/event reports always need analyst approval.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D28</span><span class="title">Alert rules live in one place</span></div><div class="dec-body">File 07 §2 is the single home of every threshold. (The "Crisis Index" in file 12 is just a dashboard gauge — it never triggers an alert.)</div></div>
+          <div class="takeaway"><strong>Takeaway:</strong> light, honest (quality-tagged), and human-approved before it reaches the client.</div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">6</span>Money &amp; cost control</h4>
+          <div class="dec"><div class="dec-head"><span class="id">D23</span><span class="title">Backfill is paid by us for demos</span></div><div class="dec-body">A 90-day historical backfill for demos comes out of our pocket (~$105–315); for campaign clients it's billed to them.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D34</span><span class="title">Honest cost accounting</span></div><div class="dec-body">We separate "batch" AI cost (backfill/re-scoring) from "synchronous" (live, ~2× price). Monitoring is simple (Uptime-Kuma); Prometheus/Grafana is Phase 2. Brief timing is fixed: draft 05:30, review 06:00–06:45, out at 07:00 IST.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D35</span><span class="title">Caps on the expensive stuff</span></div><div class="dec-body">Apify (IG/FB) capped at $120/month. Coordination "author-history" fetches are off by default until budgeted. Synthetic demo data lives in a separate database, never mixed into production.</div></div>
+          <div class="takeaway"><strong>Takeaway:</strong> cost is watched per-vendor, per-cap, and never allowed to silently balloon.</div>
+        </div>
+
+        <div class="corr-group">
+          <h4><span class="g">7</span>How we build it</h4>
+          <div class="dec"><div class="dec-head"><span class="id">D15</span><span class="title">Pilot targets</span></div><div class="dec-body">Punjab, Goa, Uttarakhand (Feb–Mar 2027 polls), UP as a stretch; Gujarat/Himachal (Nov–Dec 2027) for the unhurried sale. Brand pilots aren't tied to the election clock.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D22</span><span class="title">Timeline reality</span></div><div class="dec-body">A 12-week build ends mid-Jan 2027 — after most Feb–Mar party contracts. So first pilots run in concierge mode (analyst + partial machine) from ~week 6.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D30</span><span class="title">One scheduler</span></div><div class="dec-body">Everything (collectors, reports, retention, alerts) runs on Celery Beat in Asia/Kolkata timezone. No competing schedulers.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D31</span><span class="title">One source of names</span></div><div class="dec-body">File 21 is the single registry of all platform codes, table/enum names, the one AI answer format, .env keys, Redis keys and cron. File 05 is the only place tables are defined.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D32</span><span class="title">Scope control</span></div><div class="dec-body">File 27 maps every feature to MVP / concierge-manual / P1.5 / P2. Nothing enters the MVP without something of equal weight leaving — and it must be logged as a new decision.</div></div>
+          <div class="dec"><div class="dec-head"><span class="id">D33</span><span class="title">Schedule realignment</span></div><div class="dec-body">The concierge slice is pulled earlier (weeks 4–6), the V8 language pilot runs weeks 5–7, and no accuracy claim is made before week 7. Founder time ≈ 8–12h/week early, 5–8h/week after.</div></div>
+          <div class="takeaway"><strong>Takeaway:</strong> built in 12 weeks by AI agents under your review, with strict rules on names, schedules and scope so nothing drifts.</div>
+        </div>
+
+        <h3>Which of these need <em>your</em> active sign-off?</h3>
+        <p>Most of D1–D36 are internal engineering rules — but a few trace directly to founder decisions (file 16 §6):</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Founder decision</th><th>Backed by</th></tr></thead>
+            <tbody>
+              <tr><td>Accept X-reseller risk</td><td class="mono">D3</td></tr>
+              <tr><td>Ethical charter / red lines</td><td class="mono">D1, D12</td></tr>
+              <tr><td>First pilot: brand vs political</td><td class="mono">D15, D22</td></tr>
+              <tr><td>Light theme</td><td class="mono">D13 (already a fixed rule)</td></tr>
+              <tr><td>Budget tier S/M/L</td><td class="mono">D34, D35 (cost caps)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager">
+          <a href="#step-2"><span class="lbl">Previous · Step 2</span><span class="ttl">The 15 corrections (P1–P15)</span></a>
+          <a class="next" href="#step-4"><span class="lbl">Next · Step 4</span><span class="ttl">Who uses it &amp; what it does</span></a>
+        </div>
+      </section>
+      <section id="step-4" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 4 of 13</div>
+          <h2>Who uses it &amp; what it does</h2>
+          <div class="spec">
+            <span class="chip mono-tag">01_PRODUCT_REQUIREMENTS</span>
+            <span class="chip mono-tag">27_MVP_SCOPE</span>
+          </div>
+          <div class="meta">Two questions answered here: <em>who is it for</em>, and <em>what exactly does it do</em> — then the sharp line between what's in the MVP and what's deferred.</div>
+        </div>
+
+        <h3>The three personas (who it's for)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Persona</th><th>Who they are</th><th>Pain today</th><th>What they need from us</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Rajesh</td><td>Campaign war-room manager, state-level party</td><td>20+ people scroll X and news by hand; they miss regional-language talk entirely</td><td>A real-time dashboard across Hindi/Marathi/English, with alerts when negative talk spikes</td></tr>
+              <tr><td class="lead">Priya</td><td>PR agency director, ~5 corporate clients</td><td>Expensive Western tools (~$5k/mo) that don't understand Hindi, code-mixing or sarcasm</td><td>Affordable, Indian-language-aware listening for brand reputation</td></tr>
+              <tr><td class="lead">Amit</td><td>Independent political consultant, 2–3 candidates per cycle</td><td>Runs on gut feel + manual searches, no data</td><td>A simple, affordable tool to track his candidates + competitive intel</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The 16 features (what it does)</h3>
+        <p>Each feature has an ID (F1–F16) used across the specs.</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th style="width:52px">#</th><th>Feature</th><th>What it does, in plain words</th><th>In the MVP?</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">F1</td><td class="lead">Multi-platform collection</td><td>Pull public posts/comments from many platforms into one place</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F2</td><td class="lead">Multilingual sentiment</td><td>Positive / negative / neutral — toward each named target</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F3</td><td class="lead">Emotion detection</td><td>7 emotions: anger, fear, hope/joy, trust, sadness, surprise, none</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F4</td><td class="lead">Named entities</td><td>Auto-tag people, parties, policies, locations in every post</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F5</td><td class="lead">Topic clustering</td><td>Group talk into themes; top-10 trending topics per day</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F6</td><td class="lead">Coordination detection</td><td>Find clusters of coordinated posting — never "this person is a bot"</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F7</td><td class="lead">Interactive dashboard</td><td>Charts, filters, comparison views, export</td><td><span class="chip ok">MVP</span> <small>5 pages + Explorer</small></td></tr>
+              <tr><td class="mono">F8</td><td class="lead">Real-time alerts</td><td>Wake you at 3am on a negative spike, crisis, or dead source</td><td><span class="chip ok">MVP</span> <small>email + Slack</small></td></tr>
+              <tr><td class="mono">F9</td><td class="lead">Geographic intelligence</td><td>Map the talk to Indian states</td><td><span class="chip ok">MVP</span> <small>state level only</small></td></tr>
+              <tr><td class="mono">F10</td><td class="lead">Competitor benchmarking</td><td>Side-by-side: your candidate/brand vs rivals</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F11</td><td class="lead">Automated reports</td><td>Daily brief + weekly report</td><td><span class="chip ok">MVP</span> <small>just those two</small></td></tr>
+              <tr><td class="mono">F12</td><td class="lead">Issue &amp; narrative discovery</td><td>Surface rising topics you didn't search for</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F13</td><td class="lead">Analyst review queue</td><td>A human corrects uncertain/sarcastic/low-confidence items</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F14</td><td class="lead">Ground-survey overlay</td><td>Overlay the client's own field/survey data</td><td><span class="chip ok">MVP</span> <small>upload + table only</small></td></tr>
+              <tr><td class="mono">F15</td><td class="lead">Election mode</td><td>Lock outputs during silence/exit-poll periods</td><td><span class="chip ok">MVP</span></td></tr>
+              <tr><td class="mono">F16</td><td class="lead">Misinformation flags</td><td>Flag discussion of suspected fakes/deepfakes</td><td><span class="chip warn">Concierge</span> <small>analyst adds fact-check links</small></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:13px">So: 14 of 16 features are built as code in the MVP; F16 is done by the analyst by hand; nothing is dropped entirely.</p>
+
+        <h3>The four scope categories (the sharp line)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Category</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">MVP</td><td>Built, tested, demonstrable inside the 12-week build</td></tr>
+              <tr><td class="lead">Concierge-manual</td><td>The analyst does it by hand (spreadsheet, brief text, SOP) — no code</td></tr>
+              <tr><td class="lead">P1.5</td><td>First candidates after the MVP (weeks 13–20), if pilots ask for them</td></tr>
+              <tr><td class="lead">P2</td><td>Phase 2 — needs new data, a new model, legal clearance, or a big build</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn">
+          <div class="ct">The scope-creep rule (D32)</div>
+          <p>Nothing enters the MVP without something of equal weight leaving. If a client asks for a P1.5/P2 feature, it must be traded against something already in — and logged as a new decision.</p>
+        </div>
+
+        <h3>Explicitly out of scope — and <em>why</em></h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Not doing</th><th>Reason</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Election-outcome / vote-share prediction</td><td><span class="chip danger">Red line</span> — social posters aren't the electorate; election law restricts poll-like outputs; unproven forecasts destroy trust.</td></tr>
+              <tr><td class="lead">TV-news transcript analysis</td><td><span class="chip warn">Deferred (P2)</span> — needs broadcaster partnerships + audio transcription; text sources already cover most of the signal.</td></tr>
+              <tr><td class="lead">Video/image + vernacular ASR</td><td><span class="chip warn">Deferred (P2)</span> — a future differentiator, but complex, costly, and legally limited (client-supplied files only).</td></tr>
+              <tr><td class="lead">A mobile app</td><td><span class="chip">Deferred</span> — the brief is already phone-first (email/WhatsApp); a native app is costly with little extra value.</td></tr>
+              <tr><td class="lead">Self-serve SaaS with billing</td><td><span class="chip">Deferred</span> — managed service first (D14); buyers pay for trust + interpretation, not a login. Schema is tenant-ready for later.</td></tr>
+              <tr><td class="lead">IG/FB hashtag firehose</td><td><span class="chip ok">Done differently</span> — we get FB/Insta data via watchlist + client API (see below).</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout accent">
+          <div class="ct">We <em>do</em> get Facebook &amp; Instagram data — just not via the firehose</div>
+          <p><strong>1 · Client-authorised Graph API</strong> — for the client's own pages/apps, free, fully legal, highest quality (the gold standard for brand work).</p>
+          <p><strong>2 · A curated watchlist</strong> — ~100–300 public accounts/pages (party/leader handles, candidates, news/meme pages, brand + competitors); read their posts and public comments. MVP starts with a ≤ 50-account pilot list (D32).</p>
+          <p><strong>3 · Hashtag search (Graph API)</strong> — limited to 30 hashtags per rolling 7 days, so saved for event-day moments only.</p>
+          <p style="margin-top:8px">Why not the firehose? It's technically restricted by Meta, legally risky (US-only precedent, India untested), and expensive/brittle. The watchlist gets ~80% of the value for ~20% of the cost and risk.</p>
+        </div>
+
+        <h3>How we'll know it works (success targets)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Metric</th><th>Target</th></tr></thead>
+            <tbody>
+              <tr><td>Posts ingested per day</td><td>≥ 50,000 (Tier M)</td></tr>
+              <tr><td>Sentiment accuracy</td><td>Meets the per-language GREEN gate (on our own labelled set)</td></tr>
+              <tr><td>Dashboard load time</td><td>&lt; 3 seconds</td></tr>
+              <tr><td>Alert latency</td><td>&lt; 5 minutes from detection</td></tr>
+              <tr><td>Briefs delivered on time</td><td>≥ 95% by 07:00 IST</td></tr>
+              <tr><td>System uptime</td><td>≥ 99%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager">
+          <a href="#step-3"><span class="lbl">Previous · Step 3</span><span class="ttl">The 36 decisions (D1–D36)</span></a>
+          <a class="next" href="#step-5"><span class="lbl">Next · Step 5</span><span class="ttl">Architecture — how data flows</span></a>
+        </div>
+      </section>
+      <section id="step-5" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 5 of 13</div>
+          <h2>Architecture — how data flows</h2>
+          <div class="spec">
+            <span class="chip mono-tag">02_SYSTEM_ARCHITECTURE</span>
+          </div>
+          <div class="meta">The big picture: one app + a queue of workers, with every post flowing through 12 stages.</div>
+        </div>
+
+        <h3>The big idea</h3>
+        <p>We're building a <strong>modular monolith</strong> — <em>one</em> application made of interchangeable parts, plus a queue of "workers" doing background jobs. (Not dozens of microservices; those only if we ever get huge.) The cleanest way to understand it is to follow one post on its journey.</p>
+
+        <h3>The journey of one post (12 stages)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th style="width:150px">Stage</th><th>What happens, in plain words</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">1 · Scheduler</td><td>An "alarm clock" (Celery) wakes a source plug-in on a timer, staying inside its budget.</td></tr>
+              <tr><td class="lead">2 · Fetch + normalize</td><td>The plug-in pulls posts from one platform and converts them into one common shape.</td></tr>
+              <tr><td class="lead">3 · Scrub + hash</td><td>Strip phone/email/Aadhaar-like numbers; scramble the author's handle with a secret key (count them, don't name them).</td></tr>
+              <tr><td class="lead">4 · Dedupe</td><td>Drop exact duplicates; tag near-duplicates so identical text keeps every row but shares one AI call.</td></tr>
+              <tr><td class="lead">5 · Queue</td><td>Push the cleaned post into a to-do list (Redis Streams) for workers.</td></tr>
+              <tr><td class="lead">6 · AI reads it</td><td>Detect language → one LLM call (sentiment/emotion/sarcasm/topic) → escalate the hard ~15% → link entities → tag place → embed meaning.</td></tr>
+              <tr><td class="lead">7 · Save</td><td>Write it into the database <em>with an expiry date</em> on the raw text.</td></tr>
+              <tr><td class="lead">8 · Coordination</td><td>Every 15 min, look for clusters of near-identical text + tight timing.</td></tr>
+              <tr><td class="lead">9 · Aggregate</td><td>Roll up into hourly/daily metrics (volume, sentiment, share of voice…).</td></tr>
+              <tr><td class="lead">10 · Alert</td><td>Check the numbers against thresholds; respect the election embargo; fire alerts.</td></tr>
+              <tr><td class="lead">11 · Report</td><td>Draft the daily brief from numbers only → analyst approves → deliver.</td></tr>
+              <tr><td class="lead">12 · Purge</td><td>Hourly, delete raw text that's past its expiry (keeping only anonymous scores).</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout accent">
+          <div class="ct">The one-line version</div>
+          <p>wake up → pull → scrub → dedupe → queue → AI-read → save → cluster → aggregate → alert → brief → delete.</p>
+        </div>
+
+        <h3>The building blocks (tech stack)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Job</th><th>Tool</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Language</td><td>Python</td><td>One codebase, typed, easy for AI agents to write</td></tr>
+              <tr><td class="lead">Alarm clock + workers</td><td>Celery</td><td>One scheduler (Asia/Kolkata), no competing timers</td></tr>
+              <tr><td class="lead">The to-do list</td><td>Redis Streams</td><td>A fast queue with a "dead-letter" bin for failures</td></tr>
+              <tr><td class="lead">The database</td><td>PostgreSQL + TimescaleDB + pgvector</td><td>One boring DB that also handles time-series + "find similar posts"</td></tr>
+              <tr><td class="lead">The brain</td><td>Provider-agnostic LLM</td><td>Gemini Flash-Lite or Claude Haiku — swappable, never locked to one vendor</td></tr>
+              <tr><td class="lead">The dashboard</td><td>Streamlit (light theme)</td><td>Fast to build, with charts + maps</td></tr>
+              <tr><td class="lead">Reports</td><td>Jinja2 + WeasyPrint</td><td>Turns numbers into the daily brief / PDF (correct Indic fonts)</td></tr>
+              <tr><td class="lead">Packaging</td><td>Docker</td><td>Runs the same everywhere, easy to deploy</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>What happens when things break (resilience)</h3>
+        <p>The design assumes things <em>will</em> fail:</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Failure</th><th>How we catch it</th><th>What we do</th></tr></thead>
+            <tbody>
+              <tr><td>A platform blocks/rate-limits us</td><td>Watchdog sees zero yield</td><td>Back off, circuit-break, swap to the fallback vendor, "Source Down" alert</td></tr>
+              <tr><td>Spend spikes</td><td>Ledger vs cap</td><td>Hard-stop that vendor, alert you</td></tr>
+              <tr><td>AI returns garbage / malformed</td><td>JSON validation</td><td>Retry with a repair prompt → fallback model → dead-letter bin</td></tr>
+              <tr><td>Queue backs up</td><td>Stream length</td><td>Add more workers, shed low-priority sources</td></tr>
+              <tr><td>Database down</td><td>Healthcheck</td><td>Buffer to Redis (bounded), alert</td></tr>
+              <tr><td>Election silence starts</td><td>Embargo table</td><td>Lock publishable outputs, show banner</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>How clients stay separate (multi-tenancy)</h3>
+        <p>Public posts are stored <strong>once, globally</strong> — not once per client (D25). Each client only sees their own slice through a database rule ("row-level security") on the tenant tables (monitors, alerts, reports). One shared key scrambles every author handle; clients never see raw handles.</p>
+
+        <h3>Two questions worth pausing on</h3>
+        <div class="callout info">
+          <div class="ct">Why Redis Streams instead of just a database?</div>
+          <p>A database <strong>stores</strong> data; a queue <strong>distributes work</strong>. Redis Streams gives us speed (in-memory), clean multi-worker pull (no two workers grab the same post), burst-buffering, and retries + a dead-letter bin — all things a plain database is bad at. The database is <em>where things end up</em>; the queue is <em>how work flows through</em>.</p>
+        </div>
+        <div class="callout info">
+          <div class="ct">What does "single tenant" mean?</div>
+          <p>A <strong>tenant = one client</strong>. In the MVP we operate one client at a time (manually onboarded and billed). But the data layer is already multi-tenant-ready: public posts are shared-and-global, while each client's private tables (monitors, alerts, reports) are isolated by row-level security. So "many clients" later is a config change, not a rewrite.</p>
+        </div>
+
+        <h3>MVP vs. later (scalability path)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>MVP (now)</th><th>Later (if we grow)</th></tr></thead>
+            <tbody>
+              <tr><td>Redis Streams</td><td>Kafka</td></tr>
+              <tr><td>One Postgres</td><td>Read replicas / managed Timescale</td></tr>
+              <tr><td>LLM for every post</td><td>A distilled cheap model for the easy 85%, LLM only for hard cases</td></tr>
+              <tr><td>Streamlit</td><td>React + FastAPI</td></tr>
+              <tr><td>Docker Compose</td><td>Kubernetes / Cloud Run</td></tr>
+              <tr><td>Single tenant</td><td>Multi-tenant SaaS with billing</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:13px">The point: nothing in the MVP is a dead-end. Each "boring" choice now has a clean upgrade path later — but only when scale actually demands it.</p>
+
+        <div class="pager">
+          <a href="#step-4"><span class="lbl">Previous · Step 4</span><span class="ttl">Who uses it &amp; what it does</span></a>
+          <a class="next" href="#step-6"><span class="lbl">Next · Step 6</span><span class="ttl">Where data comes from</span></a>
+        </div>
+      </section>
+      <section id="step-6" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 6 of 13</div>
+          <h2>Where data comes from</h2>
+          <div class="spec">
+            <span class="chip mono-tag">13_DATA_SOURCES</span>
+            <span class="chip mono-tag">03_DATA_PIPELINE</span>
+            <span class="chip mono-tag">25_SEED_DATA</span>
+          </div>
+          <div class="meta">Three things: the sources, the pipeline, and — most importantly — the seed lists that ground everything, so the AI never invents a fact.</div>
+        </div>
+
+        <h3>The sources (a compact view)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Source</th><th>When</th><th>How we fetch it</th><th>Cost</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">X / Twitter</td><td>MVP (P0)</td><td>Reseller API (twitterapi.io + SocialData)</td><td>~$0.15–0.20 / 1k</td></tr>
+              <tr><td class="lead">YouTube</td><td>MVP (P0)</td><td>Official Data API (free key)</td><td>Free (10k units/day)</td></tr>
+              <tr><td class="lead">Google News + publisher RSS</td><td>MVP (P0)</td><td>RSS crawl (feedparser)</td><td>Free</td></tr>
+              <tr><td class="lead">Election / map data</td><td>MVP (P0)</td><td>Download (Lokdhaba, ECI, DataMeet)</td><td>Free</td></tr>
+              <tr><td class="lead">Threads</td><td>stretch → P1</td><td>Official keyword search</td><td>Free (2,200/day)</td></tr>
+              <tr><td class="lead">Instagram / Facebook</td><td>stretch → P1</td><td>Watchlist (Apify) + client Graph API</td><td>~$1.5–5 / 1k</td></tr>
+              <tr><td class="lead">Telegram</td><td>P1 (gated)</td><td>Public channels (Telethon)</td><td>Free — legal gate</td></tr>
+              <tr><td class="lead">GDELT, Wikipedia, Trends, Reddit, reviews, fact-checkers</td><td>P2</td><td>Various (file 13)</td><td>Various</td></tr>
+              <tr><td class="lead">Vernacular audio/video (ASR)</td><td>Phase 2</td><td>Client-supplied files → Sarvam</td><td>₹30 / audio hour</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:13px">Full detail (limits, risks, fallbacks, per-source playbooks) is in file 13. The key design points are already in Steps 3–4: swappable adapters (D2), X via resellers (D3), IG/FB watchlist only (D4).</p>
+
+        <h3>The seed rule: the AI never invents a fact</h3>
+        <div class="callout danger">
+          <div class="ct">The single most important rule in this step</div>
+          <p>Every party, leader, issue, feed, handle and channel comes from a <strong>named source of truth</strong> — fetched by a loader that records the source URL, date and file hash — and is <strong>human-approved</strong> before it's used for anything. The AI writes the loader code and tests; it never writes the content, never types an alias from memory, never "completes" a list the source didn't return.</p>
+        </div>
+
+        <h3>Where each starting list comes from</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Seed set</th><th>Source of truth</th><th>Who approves</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Recognised parties</td><td>ECI official list + Wikidata</td><td>Analyst</td></tr>
+              <tr><td class="lead">Leaders (CMs, ministers…)</td><td>Wikidata "position held" + cross-check</td><td>Analyst (two-source rule)</td></tr>
+              <tr><td class="lead">Candidates</td><td>ECI candidate lists + affidavits</td><td>Analyst</td></tr>
+              <tr><td class="lead">Constituencies</td><td>ECI delimitation + Lokdhaba</td><td>Analyst spot-check</td></tr>
+              <tr><td class="lead">Issues</td><td>Our own 40-issue list</td><td>Founder + native speakers</td></tr>
+              <tr><td class="lead">City → state map</td><td>Government Local Directory / Wikidata</td><td>Native speakers</td></tr>
+              <tr><td class="lead">Maps (GeoJSON)</td><td>DataMeet (+ patches)</td><td>Visual border check</td></tr>
+              <tr><td class="lead">Publisher feeds</td><td>Publisher websites (auto-discovery)</td><td>Analyst</td></tr>
+              <tr><td class="lead">Watchlist accounts</td><td>Manual — public/institutional roles only</td><td>Analyst + founder</td></tr>
+              <tr><td class="lead">YouTube channels</td><td>Official API (from human-written names)</td><td>Analyst</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The entity registry — how we "find" the conversation</h3>
+        <p>Turning "track Bhagwant Mann" into real search coverage needs, per entity:</p>
+        <ul>
+          <li><strong>A canonical name</strong> (from Wikidata/ECI, never memory).</li>
+          <li><strong>Aliases in 8 scripts</strong> — LLM drafts, native speaker approves.</li>
+          <li><strong>Romanization variants</strong> (Bhagwant / Maan / CM Mann) — pruned by actual usage.</li>
+          <li><strong>Disambiguation rules</strong> — bare "Mann" ≠ "mann ki baat"; bare "aap" = "you", not the party.</li>
+          <li><strong>Official handles + hashtags</strong> — discovered, never guessed.</li>
+        </ul>
+        <p>Every alias is <span class="mono">pending</span> → <span class="mono">approved</span> or <span class="mono">rejected</span>. Unreviewed aliases never reach headline metrics.</p>
+
+        <h3>Three pieces most founders miss</h3>
+        <div class="dec"><div class="dec-head"><span class="id">Nicknames</span><span class="title">Hostile nicknames — matched but never shown</span></div><div class="dec-body">People use derogatory nicknames, so we need them for recall. But they live in a separate file, need two-person approval, and are flagged match-only — never displayed in the UI, exports, reports or the AI prompt.</div></div>
+        <div class="dec"><div class="dec-head"><span class="id">Balance</span><span class="title">The balanced-coverage rule</span></div><div class="dec-body">Every party gets the same seed treatment. If we track one party's names better than another's, our numbers are skewed. So every national + pilot-state party is in the pack, with alias/handle parity per language. The client's own party gets no special treatment.</div></div>
+        <div class="dec"><div class="dec-head"><span class="id">Issues</span><span class="title">The 40-issue taxonomy</span></div><div class="dec-body">A starting list of 40 issues — jobs, inflation, fuel, farmers, water, power, corruption, drugs, women's safety, migration… — written by the founder + analyst, translated by native speakers. Five are "sensitive" (reservation, communal harmony, religious disputes, election process, press freedom): report prose is analyst-reviewed, UI shows topic-level only.</div></div>
+
+        <h3>The query-budget allocator</h3>
+        <p>Each paid source has a daily budget. A simple importance score decides who gets how much: primary client &gt; direct rival &gt; issue &gt; watch, boosted by an event within 48h or an open crisis, and by under-coverage. This stops us burning budget on exhausted queries and keeps the important entity first.</p>
+
+        <h3>Demo &amp; test data (before live data exists)</h3>
+        <div class="callout accent">
+          <div class="ct">Synthetic, never real people</div>
+          <p>Before real data arrives (weeks 2–4), we use fully synthetic data: fictional parties/leaders/brands, deterministic, in a separate database, pre-labelled (zero LLM cost). It plants scenarios — a coordination burst, a 6-hour crisis, sarcasm, a source gap, a RED-gate language — to prove the system works. Hard rule: synthetic text never mentions real parties or leaders.</p>
+        </div>
+
+        <div class="pager">
+          <a href="#step-5"><span class="lbl">Previous · Step 5</span><span class="ttl">Architecture — how data flows</span></a>
+          <a class="next" href="#step-7"><span class="lbl">Next · Step 7</span><span class="ttl">How the AI reads it</span></a>
+        </div>
+      </section>
+      <section id="step-7" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 7 of 13</div>
+          <h2>How the AI reads it</h2>
+          <div class="spec">
+            <span class="chip mono-tag">04_AI_ML_SPECS</span>
+            <span class="chip mono-tag">17_GOLD_SET_AND_PROMPTS</span>
+          </div>
+          <div class="meta">The "brain" of the product: one AI read per post, tiered, plus the gold set that makes our accuracy honest.</div>
+        </div>
+
+        <h3>The big idea</h3>
+        <p>Every post gets <strong>one AI read</strong>, using a <strong>tiered</strong> approach: a cheap model reads everything; a stronger model re-reads only the hard ~15%; then deterministic code links names, finds places, groups topics and detects coordination. The AI returns a <strong>structured answer</strong> — not prose — so we can count and aggregate it.</p>
+
+        <h3>What the AI says about each post</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th style="width:150px">Field</th><th>What it captures</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Language + script</td><td>Which language, and native / roman / mixed script (e.g. <span class="mono">hi</span> + <span class="mono">roman</span> = Hinglish)</td></tr>
+              <tr><td class="lead">Content class</td><td>opinion / news / off-topic / cannot-tell</td></tr>
+              <tr><td class="lead">Targets</td><td>For each named entity: sentiment + stance</td></tr>
+              <tr><td class="lead">Emotion</td><td>7 labels: anger, fear, hope/joy, trust, sadness, surprise, none</td></tr>
+              <tr><td class="lead">Sarcasm</td><td>yes / no / unsure + the <em>intended</em> polarity</td></tr>
+              <tr><td class="lead">Topic</td><td>≤ 4 words ("fuel prices")</td></tr>
+              <tr><td class="lead">Harm flag</td><td>none / abuse / hate / threat (for analyst triage)</td></tr>
+              <tr><td class="lead">Confidence + escalation</td><td>How sure it is, and <em>why</em> it might be wrong</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The key concept: target-aware sentiment</h3>
+        <p>Ordinary sentiment tools say <em>"this post is negative."</em> We say <strong>"negative about whom?"</strong> One post can be positive about one target and negative about another.</p>
+        <div class="callout accent">
+          <div class="ct">Example</div>
+          <p>"Floods destroyed the village, so much grief, but the CM worked all night on relief" → <strong>negative</strong> about the <em>flood</em> (an issue), <strong>positive</strong> about the <em>Chief Minister</em> (a leader).</p>
+        </div>
+        <p>There's a second, separate field — <strong>stance</strong>: does the author <em>back</em> or <em>oppose</em> the target (in this post only). Hard rule (D1): we never infer the author's own party, religion, caste or voting intention — only "share of posts opposing Party X", never "share of Party-Y supporters".</p>
+
+        <h3>The stages, in order</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th style="width:150px">Stage</th><th>In plain words</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">0 · Pre-filters</td><td>Dedupe, spam-drop, script detection — cheap checks before spending AI money (drops ~15–30%)</td></tr>
+              <tr><td class="lead">1 · Language ID</td><td>"What language is this?" — script rules → IndicLID → Hinglish detector</td></tr>
+              <tr><td class="lead">2 · Tier-1 LLM</td><td>The cheap model reads every post → structured JSON</td></tr>
+              <tr><td class="lead">3 · Tier-2 escalation</td><td>A stronger model re-reads the hard ~15% (low-confidence, sarcastic, code-mixed, unclear targets)</td></tr>
+              <tr><td class="lead">4 · Post-processing</td><td>Link entities, geotag, embed → topics, coordination (deterministic code)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Coordination: clusters, never "bots"</h3>
+        <p>We deliberately removed "bot detection". Instead we find <strong>clusters</strong> of coordinated posting: near-identical text from ≥ 10 distinct accounts and ≥ 30 posts in a tight window, scored 0–100 (text similarity + timing), and <strong>analyst-confirmed</strong> before a client sees it. Wording is always "X% of today's negative volume belongs to a coordinated cluster" — never a list of named "bot accounts".</p>
+
+        <h3>How we measure accuracy (the gold set)</h3>
+        <p>This is the honest part — why our numbers are trustworthy. <strong>Why we need it:</strong></p>
+        <ul>
+          <li><strong>It's the product's promise.</strong> We sell "published per-language accuracy", so we must measure it before selling (week 7, CP-3).</li>
+          <li><strong>"Accuracy" is meaningless without human truth.</strong> The AI's confidence score is self-reported; only comparing against human-labelled posts tells us if it's actually right.</li>
+          <li><strong>The frozen test set prevents self-deception.</strong> 25% is never shown during development, so we can't "teach to the test".</li>
+          <li><strong>Gates + the human ceiling keep us honest about limits.</strong> Humans only agree on sarcasm ~30–50% of the time, so no machine can be "95% accurate on sarcasm" — we report it as a share, and cap the Hinglish gate at ~0.72 (best public benchmark ~0.75).</li>
+        </ul>
+        <p><strong>How we'll do it:</strong></p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Step</th><th>What happens</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">1 · Rulebook</td><td>Write the annotation guideline (defines opinion vs news, sarcasm, stance — so annotators agree)</td></tr>
+              <tr><td class="lead">2 · Sample</td><td>Pull ~500 real posts per language (60% natural, 40% hard cases)</td></tr>
+              <tr><td class="lead">3 · Hire</td><td>2–3 native speakers per language + a lead (vendors: Karya + 2 others, quoted week 0)</td></tr>
+              <tr><td class="lead">4 · Label</td><td>Annotators see text only — no author handle, name or URL</td></tr>
+              <tr><td class="lead">5 · Check agreement</td><td>25% triple-labelled; disagreements go to the lead; fix the guideline, not the model</td></tr>
+              <tr><td class="lead">6 · Split</td><td>75% for tuning, 25% frozen test (assigned by a hash at creation)</td></tr>
+              <tr><td class="lead">7 · Measure</td><td>Run the AI on the frozen set → accuracy score per language</td></tr>
+              <tr><td class="lead">8 · Gate</td><td>🟢 GREEN (live) · 🟡 AMBER (badge) · 🔴 RED (volume only)</td></tr>
+              <tr><td class="lead">9 · Keep watching</td><td>Monthly re-sample 200 posts/language; re-run the test set on every prompt/model change</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:13px">Timeline: quotes week 0 · annotators week 2–4 · ~4,500 items by week 7 (CP-3) · the V8 pilot (200 posts × 9 languages × 3 models, blind) in weeks 5–7 picks the model and produces the first accuracy card. Cost: ~₹0.5–1.5 lakh (budget up to ₹1–3 lakh until real quotes).</p>
+
+        <h3>Guardrails baked into the prompt</h3>
+        <ul>
+          <li><strong>Prompt-injection protection:</strong> post text is treated as data, never instructions — hidden "ignore your rules" text can't hijack the AI.</li>
+          <li><strong>Neutrality:</strong> treat every party symmetrically; never express the AI's own view.</li>
+          <li><strong>Honesty:</strong> if it can't tell, it says so (low confidence + escalate) instead of guessing.</li>
+        </ul>
+
+        <h3>Cost (why this is affordable)</h3>
+        <p>One AI read costs roughly <strong>$4–17 per 100,000 posts</strong>. The expensive part is <strong>labelling, not inference</strong>: ~₹0.5–1.5 lakh one-time for the gold set. Tier-2 (the strong model) is capped so it can't silently eat the budget.</p>
+
+        <div class="pager">
+          <a href="#step-6"><span class="lbl">Previous · Step 6</span><span class="ttl">Where data comes from</span></a>
+          <a class="next" href="#step-8"><span class="lbl">Next · Step 8</span><span class="ttl">Where it is stored</span></a>
+        </div>
+      </section>
+      <section id="step-8" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 8 of 13</div>
+          <h2>Where it is stored</h2>
+          <div class="spec">
+            <span class="chip mono-tag">05_DATABASE_SCHEMA</span>
+            <span class="chip mono-tag">24_DATA_DICTIONARY</span>
+            <span class="chip mono-tag">21_CANONICAL_CONTRACTS</span>
+          </div>
+          <div class="meta">One boring database, but three iron rules about what we store, who can see it, and how long it lives.</div>
+        </div>
+
+        <h3>The big idea</h3>
+        <p>One boring database: <strong>PostgreSQL + TimescaleDB + pgvector + Redis</strong>. What matters here isn't the technology — it's the three iron rules about what we store, who can see it, and how long it lives.</p>
+
+        <h3>Two halves of the data</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Half</th><th>What's in it</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Shared corpus (no tenant_id)</td><td>Public posts, stored once globally</td><td>One tweet = one row, seen by every client who tracks that topic</td></tr>
+              <tr><td class="lead">Tenant data (row-level security)</td><td>Each client's private config + outputs</td><td>Their monitors, alerts, reports, tracked entities, users</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The clever part (D25): a tweet about "fuel prices" that 5 clients care about is collected and stored <strong>once</strong> — then each client's dashboard reads only the slice that matters to them. Clients are isolated by "row-level security" that <em>fails closed</em> — a client can never see another client's data, even by accident.</p>
+
+        <h3>The main tables, in plain words</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Table</th><th>What it holds (plain)</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">posts</td><td>The raw corpus — text, language, sentiment, emotion, engagement, author hash, geo</td></tr>
+              <tr><td class="mono">post_mentions</td><td>One row per named entity per post ("negative about the CM, positive about the flood")</td></tr>
+              <tr><td class="mono">coordination_clusters</td><td>Clusters of coordinated posting (score, size, evidence — aggregated only)</td></tr>
+              <tr><td class="mono">daily_aggregates</td><td>The pre-computed numbers clients actually read (volume, net sentiment, emotion counts)</td></tr>
+              <tr><td class="mono">tenants · users · tenant_entities</td><td>Who the clients are, their logins, what they track</td></tr>
+              <tr><td class="mono">monitors · alerts · report_runs</td><td>What to collect, when alerts fire, the briefs</td></tr>
+              <tr><td class="mono">review_queue</td><td>Posts waiting for a human analyst</td></tr>
+              <tr><td class="mono">gold_items · eval_runs</td><td>The accuracy measurement (Step 7)</td></tr>
+              <tr><td class="mono">spend_ledger · llm_runs</td><td>Every rupee and every AI call, logged</td></tr>
+              <tr><td class="mono">audit_log · embargo_windows · data_deletion_requests</td><td>Compliance: who did what, election locks, erasure requests</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The three iron rules (this part matters)</h3>
+        <div class="dec"><div class="dec-head"><span class="id">Rule 1</span><span class="title">No per-person political inference — ever (D1)</span></div><div class="dec-body">There is no column anywhere for a person's leaning, religion, caste, or an <span class="mono">is_bot</span> flag. Literally — a CI test scans the entire database schema for those names and fails the build if any appear. Authors are stored only as a scrambled hash.</div></div>
+        <div class="dec"><div class="dec-head"><span class="id">Rule 2</span><span class="title">Raw text is perishable; scores are durable (D6, D29)</span></div><div class="dec-body">Every post gets an expiry date the moment it's stored (YouTube 30 days, others 90). An hourly purge deletes raw text — and every fragment (mentions, embeddings, search index). But the scores we derived (sentiment, emotion, topic, cluster id) contain no raw text and are kept forever.</div></div>
+        <div class="dec"><div class="dec-head"><span class="id">Rule 3</span><span class="title">Author hashing (D1, D25)</span></div><div class="dec-body">Author identities are scrambled with one global secret key into a 64-character hash. We can count distinct authors without knowing who they are. The key is versioned — rotating it deliberately breaks all linkage.</div></div>
+
+        <h3>Who can see what</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Role</th><th>Can see</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Client</td><td>Aggregates and views only — never author hashes, author profile counts, coordination scores, raw handles, or match-only aliases</td></tr>
+              <tr><td class="lead">Analyst</td><td>The raw corpus (to review uncertain posts) and cluster membership (audit-logged) — still no per-person political labels</td></tr>
+              <tr><td class="lead">Admin</td><td>Operational data (users, billing, audit log)</td></tr>
+              <tr><td class="lead">Workers</td><td>The pipeline writes, but never the UI</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:13px">There's even a dedicated "audit writer" role that can only append to the audit log — so nobody can edit history.</p>
+
+        <h3>How long things live</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Data</th><th>Retention</th></tr></thead>
+            <tbody>
+              <tr><td>Raw text</td><td>30 days (YouTube) / 90 days (others) → then deleted</td></tr>
+              <tr><td>Derived scores &amp; aggregates</td><td>Forever (no raw text)</td></tr>
+              <tr><td>Raw rows (compressed)</td><td>2 years</td></tr>
+              <tr><td>Alerts &amp; deliveries</td><td>1 year</td></tr>
+              <tr><td>Spend ledger</td><td>3 years</td></tr>
+              <tr><td>Audit log</td><td>13 months</td></tr>
+              <tr><td>Client data</td><td>Contract term + 1 year, deleted on request</td></tr>
+              <tr><td>Gold-set text</td><td>Follows the same TTL rules (Step 7)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>One bonus: this is the privacy compliance map</h3>
+        <p>File 24 (the "data dictionary") doubles as our <strong>DPDP data map</strong> — the legal document that says, for every single column: is this personal data? where did it come from? how long do we keep it? who can see it? It's required by the DPDP Act (Rule 6), and building it this way means a lawyer can audit us column-by-column.</p>
+
+        <div class="pager">
+          <a href="#step-7"><span class="lbl">Previous · Step 7</span><span class="ttl">How the AI reads it</span></a>
+          <a class="next" href="#step-9"><span class="lbl">Next · Step 9</span><span class="ttl">What we compute &amp; show</span></a>
+        </div>
+      </section>
+      <section id="step-9" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 9 of 13</div>
+          <h2>What we compute &amp; show</h2>
+          <div class="spec">
+            <span class="chip mono-tag">12_ANALYTICS_PLAYBOOK</span>
+            <span class="chip mono-tag">06_DASHBOARD_UI</span>
+            <span class="chip mono-tag">14_BRAND_AND_DESIGN</span>
+          </div>
+          <div class="meta">What the client actually sees: numbers, charts and briefs — governed by two rules: every number carries a quality tag, and we never claim what the data can't support.</div>
+        </div>
+
+        <h3>The core metrics (the "daily vital signs")</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Metric</th><th>What it means, plain</th><th>Range</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Volume</td><td>How much talk there is (raw, unique messages, distinct authors)</td><td>count</td></tr>
+              <tr><td class="lead">Net Sentiment</td><td>Positive share minus negative share — toward a named target</td><td>−100 … +100</td></tr>
+              <tr><td class="lead">Engagement-weighted sentiment</td><td>Same, weighted by likes/shares (does the reach skew negative?)</td><td>−100 … +100</td></tr>
+              <tr><td class="lead">Share of Voice</td><td>Your share of the conversation vs. rivals</td><td>0–100%</td></tr>
+              <tr><td class="lead">Emotion mix</td><td>Anger, fear, hope/joy, trust, sadness, surprise, none</td><td>7 shares</td></tr>
+              <tr><td class="lead">Language mix</td><td>Hindi vs Hinglish vs Punjabi… (Hinglish shown separately)</td><td>shares</td></tr>
+              <tr><td class="lead">Platform mix</td><td>X vs YouTube vs news… (caveat: not the population)</td><td>shares</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Plus a set of <strong>trend/anomaly</strong> views (spikes, sentiment shifts, velocity) that answer <em>"what changed, and is it unusual?"</em></p>
+
+        <h3>The dashboard (MVP: 5 pages + Explorer)</h3>
+        <p>The <em>demo</em> shows 20 pages to showcase the vision; the actual 12-week build ships <strong>5 pages + an Explorer</strong>:</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Page</th><th>What it shows</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">1 · Overview</td><td>KPI cards, sentiment timeline, platform split, topic cloud, emotion mix, recent posts</td></tr>
+              <tr><td class="lead">2 · Compare</td><td>Side-by-side scorecard, share of voice, issue head-to-head (your entity vs rivals)</td></tr>
+              <tr><td class="lead">3 · Geography</td><td>India map by state — toggle between "Talk about X" vs "Talk from X"</td></tr>
+              <tr><td class="lead">4 · Narratives &amp; Coordination</td><td>Rising topics you didn't search for + coordination clusters (never "bots")</td></tr>
+              <tr><td class="lead">5 · Alerts, Briefs &amp; Review</td><td>Active alerts, the daily/weekly brief, the analyst review queue</td></tr>
+              <tr><td class="lead">Explorer</td><td>Full-text search, filterable post table, survey overlay, the Word Lab tab</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The quality badge — the single most important UI element</h3>
+        <p>Every KPI, chart and table row carries a badge that answers <em>"how much should I trust this?"</em></p>
+        <div class="callout accent">
+          <div class="ct">Anatomy of a badge</div>
+          <p><span class="mono">[ ◐ Medium ]  n = 1,820 · Lang: unvalidated · Coordination 12% · Sarcasm 14%</span></p>
+        </div>
+        <ul>
+          <li><strong>Grade</strong> 🟢 High / 🟡 Medium / ⊘ Insufficient (grade C = the number is hidden, replaced with "Too few posts").</li>
+          <li><strong>n</strong> = distinct authors (after de-duplicating near-identical posts).</li>
+          <li><strong>Language gate</strong> GREEN / AMBER / RED / "Unvalidated".</li>
+          <li><strong>Badges</strong> sarcasm %, coordination %, location-known %, single-platform, delayed — shown only when their rule fires.</li>
+        </ul>
+        <p class="muted" style="font-size:13px">The rule: a number without its badge is a defect. This is what earns trust with sceptical political buyers.</p>
+
+        <h3>The honesty rules (what we never claim)</h3>
+        <ul>
+          <li>Never show a vote prediction or seat forecast.</li>
+          <li>Never say social talk equals the electorate (platform users ≠ voters).</li>
+          <li>Never say "X caused Y" — only "associated with" (events are observational).</li>
+          <li>Never colour a map by "winning party" (that implies a forecast).</li>
+          <li>Never name individuals — clusters, narratives and counts only.</li>
+        </ul>
+
+        <h3>The design (light, readable, colour-blind safe)</h3>
+        <ul>
+          <li><strong>Light theme only</strong> (D13) — warm off-white, orange #DA7756 accent.</li>
+          <li><strong>Colour-blind safe</strong> — sentiment is blue/red-brick/grey (never red/green), always with a glyph (▲▼●).</li>
+          <li><strong>Neutral on politics</strong> — no party is ever "green" or "winning"; entity colours are neutral and listed alphabetically.</li>
+          <li><strong>Indic text is first-class</strong> — Devanagari, Tamil, Telugu, Bengali, Kannada, Gujarati, Gurmukhi render everywhere (dashboard, PDF, email).</li>
+        </ul>
+
+        <div class="pager">
+          <a href="#step-8"><span class="lbl">Previous · Step 8</span><span class="ttl">Where it is stored</span></a>
+          <a class="next" href="#step-10"><span class="lbl">Next · Step 10</span><span class="ttl">Alerts &amp; reports</span></a>
+        </div>
+      </section>
+      <section id="step-10" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 10 of 13</div>
+          <h2>Alerts &amp; reports</h2>
+          <div class="spec">
+            <span class="chip mono-tag">07_ALERTS_AND_REPORTING</span>
+          </div>
+          <div class="meta">How the client gets woken up, and what they read in the morning — both statistical, embargo-aware, and never hallucinating numbers.</div>
+        </div>
+
+        <h3>The big idea</h3>
+        <p>Two things leave the system toward the client: <strong>alerts</strong> (real-time warnings when something changes) and <strong>reports</strong> (the Daily Brief + Weekly Report, the only two auto-generated in the MVP). Both are statistical, embargo-aware, and never hallucinate numbers.</p>
+
+        <h3>The 10 alert types</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Alert</th><th>When it fires (plain)</th><th>Severity</th><th>Who sees it</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Sentiment Shift</td><td>Negative talk is genuinely up vs. usual for this hour</td><td>High</td><td>Client</td></tr>
+              <tr><td class="lead">Volume Surge</td><td>Mentions are ~2× the expected level</td><td>Medium</td><td>Client</td></tr>
+              <tr><td class="lead">New Trending Topic</td><td>A brand-new topic cluster is growing fast</td><td>Medium</td><td>Client</td></tr>
+              <tr><td class="lead">Coordination Surge</td><td>The share of coordinated posts jumps abnormally</td><td>High</td><td>Client</td></tr>
+              <tr><td class="lead">Crisis</td><td>Negative &gt;50% and volume ~2× and a trending topic/coordination surge — all at once</td><td>Critical</td><td>Client</td></tr>
+              <tr><td class="lead">Competitor Momentum</td><td>A rival's positive share rises ≥15 pts in a day</td><td>Low</td><td>Client</td></tr>
+              <tr><td class="lead">Embargo Reminder</td><td>An election silence window starts in 6h / 1h</td><td>Info</td><td>Client</td></tr>
+              <tr><td class="lead">Source Down</td><td>A collector has produced nothing for too long</td><td>High</td><td>Internal only</td></tr>
+              <tr><td class="lead">Spend Cap</td><td>We've hit 70% / 90% / 100% of a vendor's budget</td><td>Med→High</td><td>Internal only</td></tr>
+              <tr><td class="lead">Quality Alert</td><td>Sarcasm/low-confidence share spikes, or a language's accuracy drops</td><td>Medium</td><td>Internal only</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>How alerts actually work (why they're not noisy)</h3>
+        <ul>
+          <li>Compare against a <strong>seasonal baseline</strong> ("usual for this hour on this weekday"), not a flat average.</li>
+          <li>Require a <strong>minimum sample size + effect-size floor</strong> — a small entity can't page you over noise.</li>
+          <li>Use a <strong>z-score + confidence interval</strong> (is it really above baseline, or just luck?).</li>
+          <li>Have <strong>cooldowns</strong> (no re-alert every 5 minutes) and dedupe keys (a retry never double-sends).</li>
+          <li><strong>AMBER/RED languages never fire share-based alerts</strong> (they'd be unreliable).</li>
+        </ul>
+
+        <h3>The reports (Daily Brief + Weekly Report)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Report</th><th>Auto-generated?</th><th>Approval</th><th>When</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Daily Brief (1 page)</td><td>✅</td><td>Analyst required; auto-approve opt-in per client</td><td>07:00 IST</td></tr>
+              <tr><td class="lead">Weekly Report (PDF)</td><td>✅</td><td>Always analyst-approved</td><td>Monday 09:00 IST</td></tr>
+              <tr><td class="lead">Event / Crisis / Constituency / Brand-monthly</td><td>❌ analyst writes by hand</td><td>Always</td><td>On demand</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The hallucination guard (this is important)</h3>
+        <p>The LLM that writes the brief is <strong>not allowed to make up numbers</strong>:</p>
+        <ol>
+          <li>Python builds a <strong>JSON of facts</strong> (exact numbers) — the LLM sees only that, never the database.</li>
+          <li>The prompt says: use only these facts, refer to them as <span class="mono">{"{{f1}}"}</span>, never compute new figures, say "not available" if a fact is missing.</li>
+          <li><strong>Every number in the finished text is programmatically checked</strong> against the facts — a wrong number rejects the draft and it's regenerated; two failures → template summary (no prose) + flagged for the analyst.</li>
+        </ol>
+        <p class="muted" style="font-size:13px">The result: the prose can be imperfect, but the numbers can never be wrong — they're substituted, not generated.</p>
+
+        <h3>The daily brief timing (the 07:00 promise)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Time (IST)</th><th>What happens</th></tr></thead>
+            <tbody>
+              <tr><td class="num">05:00</td><td>Data cut (the brief reads only data up to here)</td></tr>
+              <tr><td class="num">05:30</td><td>AI draft generated</td></tr>
+              <tr><td class="num">06:00 – 06:45</td><td>Analyst reviews / edits / approves</td></tr>
+              <tr><td class="num">06:45</td><td>"Review overdue" reminder (if still unapproved)</td></tr>
+              <tr><td class="num">07:00</td><td>Delivered — held, never auto-sent, unless the client opted into auto-approve</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Delivery channels</h3>
+        <ul>
+          <li><strong>Email</strong> (default — Amazon SES, light-theme, Indic fonts)</li>
+          <li><strong>Slack</strong> (alerts + brief summary)</li>
+          <li><strong>WhatsApp Business</strong> (optional, Phase 2 — Indian buyers live there)</li>
+          <li><strong>SMS</strong> (optional, Phase 2 — CRITICAL only)</li>
+        </ul>
+        <p>All delivery is <strong>embargo-aware</strong> (D11): during a silence window, publishable outputs are held and released automatically after; internal alerts and private client reports still go out, with a "private use, not for publication" footer.</p>
+
+        <div class="pager">
+          <a href="#step-9"><span class="lbl">Previous · Step 9</span><span class="ttl">What we compute &amp; show</span></a>
+          <a class="next" href="#step-11"><span class="lbl">Next · Step 11</span><span class="ttl">Law, ethics &amp; security</span></a>
+        </div>
+      </section>
+      <section id="step-11" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 11 of 13</div>
+          <h2>Law, ethics &amp; security</h2>
+          <div class="spec">
+            <span class="chip mono-tag">08_LEGAL_COMPLIANCE</span>
+            <span class="chip mono-tag">19_SECURITY_TENANCY_OPS</span>
+          </div>
+          <div class="meta">The "trust layer": legal posture, the ethical charter, and how we keep each client's data separate and safe.</div>
+        </div>
+
+        <div class="callout danger">
+          <div class="ct">The caveat that runs through everything</div>
+          <p>These files are <strong>research, not legal advice</strong>. An Indian technology/privacy lawyer must sign off before the first paying client. That's a hard rule, not a footnote.</p>
+        </div>
+
+        <h3>The legal landscape</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Law</th><th>What it governs</th><th>Our posture</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">DPDP Act 2023 (privacy)</td><td>Personal data processing</td><td>The big one — build as if in force Nov 2026 (D10)</td></tr>
+              <tr><td class="lead">IT Act + Rules</td><td>Unauthorised access; AI-content labelling</td><td>We only listen, so duties are limited</td></tr>
+              <tr><td class="lead">Election law (s.126/126A)</td><td>Silence period + exit-poll windows</td><td>The embargo switch (D11)</td></tr>
+              <tr><td class="lead">Copyright Act</td><td>Articles, media</td><td>Store headline+snippet only; never republish full text</td></tr>
+              <tr><td class="lead">Platform ToS</td><td>Automated collection</td><td>The riskiest part</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The key legal uncertainty: DPDP "public data"</h3>
+        <p>The DPDP Act exempts data <strong>a person made public themselves</strong>. That's our legal basis. But the boundary is untested:</p>
+        <ul>
+          <li>✅ <strong>Clearly exempt</strong>: a person blogging their own views.</li>
+          <li>⚠️ <strong>Not clearly exempt</strong>: posts about a person by others; followers-only/semi-private spaces; inferred/derived data; content later deleted.</li>
+        </ul>
+        <p>Our design response (D1, D10): aggregate-first, hashed handles, no per-person inference, provenance logged, honour deletions — we stay on the safe side of every grey area.</p>
+
+        <h3>The three big risks</h3>
+        <div class="dec"><div class="dec-head"><span class="id">1</span><span class="title">Platform ToS</span></div><div class="dec-body">X resellers and IG/FB watchlists may breach those platforms' contracts; the US court wins for scrapers are US-only, India is untested. This is why D3 needs your sign-off.</div></div>
+        <div class="dec"><div class="dec-head"><span class="id">2</span><span class="title">Election law</span></div><div class="dec-body">Publishing "poll-like" outputs near elections is a criminal risk. The embargo switch exists to prevent it.</div></div>
+        <div class="dec"><div class="dec-head"><span class="id">3</span><span class="title">DPDP inferred data</span></div><div class="dec-body">Combining scraped data with non-public data (CRM, purchased lists) pulls us inside the Act. We never do this.</div></div>
+
+        <h3>The ethical charter (signed before launch)</h3>
+        <div class="grid2">
+          <div class="card"><h4 style="color:var(--ok)">We will</h4>
+            <ul style="margin:0">
+              <li>Use only public data</li>
+              <li>Aggregate before reporting</li>
+              <li>Publish methodology + per-language accuracy</li>
+              <li>Flag coordinated behaviour neutrally, on all sides</li>
+              <li>Human review before client reports</li>
+              <li>Honour deletions and takedowns</li>
+              <li>Label AI-generated content</li>
+            </ul>
+          </div>
+          <div class="card"><h4 style="color:var(--danger)">We will never</h4>
+            <ul style="margin:0">
+              <li>Create/spread disinformation or astroturf</li>
+              <li>Build individual voter profiles or infer religion/caste/leaning</li>
+              <li>Target or surveil journalists, activists, private citizens</li>
+              <li>Suppress legitimate opposition</li>
+              <li>Give data to foreign governments</li>
+              <li>Sell raw personal data</li>
+              <li>Publish during election embargo windows</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Security &amp; tenancy</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Layer</th><th>What we do</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Isolation</td><td>One shared stack; each client's data hard-isolated by row-level security (fails closed). Political clients can get a physically separate stack as premium.</td></tr>
+              <tr><td class="lead">Auth</td><td>Simple signed login for demos → oauth2-proxy (with MFA) before the first paid political client</td></tr>
+              <tr><td class="lead">Roles</td><td>admin / analyst / client_viewer — least privilege, default deny. Clients never see author hashes or raw handles.</td></tr>
+              <tr><td class="lead">Secrets</td><td>Never in the repo; in Secret Manager; rotated; never echoed in logs/chat. The AUTHOR_HASH_KEY is the "crown jewel".</td></tr>
+              <tr><td class="lead">Encryption</td><td>TLS everywhere, encrypted at rest, India region only</td></tr>
+              <tr><td class="lead">Audit log</td><td>Append-only — nobody can edit or delete history (a dedicated role can only append)</td></tr>
+              <tr><td class="lead">Cost guardrails</td><td>Per-vendor caps with a kill-switch at 100%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The ethical operating procedure (not a poster)</h3>
+        <ol>
+          <li><strong>Intake screening</strong> before any client — a 10-question form. Any "yes" to profiling / fake accounts / private-monitoring / journalist-targeting = declined.</li>
+          <li><strong>Hard refusal list</strong> (R1–R10) — voter profiling, disinformation, harassment, WhatsApp scraping, publishing polls in silence windows, selling raw data, working for two opposing clients in the same seat.</li>
+          <li><strong>Escalation ladder</strong> — suspected misuse → confirm → suspend → (if illegal) preserve evidence + consider reporting to authorities. Every case logged in an Ethics Register.</li>
+          <li><strong>Quarterly review</strong> of the register; annual transparency note.</li>
+        </ol>
+
+        <div class="pager">
+          <a href="#step-10"><span class="lbl">Previous · Step 10</span><span class="ttl">Alerts &amp; reports</span></a>
+          <a class="next" href="#step-12"><span class="lbl">Next · Step 12</span><span class="ttl">Running &amp; building it</span></a>
+        </div>
+      </section>
+      <section id="step-12" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 12 of 13</div>
+          <h2>Running &amp; building it</h2>
+          <div class="spec">
+            <span class="chip mono-tag">11_AGENT_WORKFLOW</span>
+            <span class="chip mono-tag">09_DEPLOYMENT</span>
+            <span class="chip mono-tag">26_ENV_BOOTSTRAP</span>
+            <span class="chip mono-tag">29_COST_TRACKING</span>
+            <span class="chip mono-tag">15_TESTING</span>
+          </div>
+          <div class="meta">The operational layer: how it gets built by agents, what you do, and how we keep every rupee honest.</div>
+        </div>
+
+        <h3>The big idea</h3>
+        <p>Two sides, same discipline: <strong>build</strong> (agents write the code over 12 weeks) and <strong>run</strong> (a live system with a spend ledger, caps, and weekly reconciliation). The shared habit: record every cost in one place, compare it to a cap, look at it weekly.</p>
+
+        <h3>How it gets built (the agent workflow)</h3>
+        <p>Six roles, one rule — <em>"workers write; the Orchestrator specifies and audits; the Verifier re-checks. No agent grades its own work."</em></p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Role</th><th>Job</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">A0 Orchestrator</td><td>Splits sprints into tasks, spawns workers, merges green PRs</td></tr>
+              <tr><td class="lead">A1 Infra + DB</td><td>Repo, Docker, database, deployment</td></tr>
+              <tr><td class="lead">A2 Collectors + Pipeline</td><td>One worktree per data source</td></tr>
+              <tr><td class="lead">A3 NLP + Eval</td><td>The AI brain + the gold set</td></tr>
+              <tr><td class="lead">A4 Analytics + Dashboard + Alerts</td><td>What the client sees</td></tr>
+              <tr><td class="lead">A5 Verifier + Docs</td><td>Independent reviewer (Opus) + documentation</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><strong>Task = branch = worktree = one agent</strong> — no clobbering (max 4 at a time).</li>
+          <li><strong>Every task has a runnable acceptance command</strong> — "done" = that command exits 0.</li>
+          <li><strong>Two-failure stop</strong> — same failure twice → stop and report two alternatives.</li>
+          <li><strong>Scope fixed by file 27</strong> — anything outside the MVP is refused unless traded in.</li>
+          <li><strong>Secrets never echoed</strong> — no key in logs, chat, tickets or screenshots.</li>
+        </ul>
+        <p class="muted" style="font-size:13px">~84 tasks = ~84 PRs over 12 weeks (S0–S9), ending at CP-7: pilot go/no-go.</p>
+
+        <h3>Your job (the founder)</h3>
+        <p>Three things, ~8–12h/week early, 5–8h/week after:</p>
+        <ol>
+          <li><strong>Answer the 7 decisions</strong> (Step 1): X-reseller risk, tier, first pilot, charter, Telegram, name, hosting.</li>
+          <li><strong>File the Week-0 long-lead requests</strong> (slow, so they start first): annotator quotes, counsel, native-speaker reviewers, the analyst, X vendor accounts, hosting credits, trademark.</li>
+          <li><strong>Run the checkpoints</strong> — review gates, not individual PRs.</li>
+        </ol>
+        <div class="callout accent">
+          <div class="ct">The key division</div>
+          <p>You create accounts and hold payment methods; agents never sign up for anything and never see a key value. You fill <span class="mono">.env</span> yourself from your password manager — never pasting a key into chat.</p>
+        </div>
+
+        <h3>Deployment</h3>
+        <ul>
+          <li><strong>One VM</strong> (India: GCP asia-south1 / AWS ap-south-1), Docker Compose, Caddy (automatic TLS).</li>
+          <li>Databases on an internal network (no public ports); only the proxy is reachable.</li>
+          <li>One scheduler (Celery Beat), one reverse proxy, Uptime-Kuma monitoring.</li>
+          <li>Backups daily + point-in-time recovery; monthly restore tests (untested backup = no backup).</li>
+          <li>CPU-only — no GPU needed (the AI is API calls).</li>
+        </ul>
+
+        <h3>Cost tracking (where discipline lives)</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Side</th><th>What it tracks</th><th>Key control</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Build</td><td>Agent tokens per sprint, PRs merged, rework rate</td><td>Sprint budget; stop when usage &gt;80% but tasks &lt;60% done</td></tr>
+              <tr><td class="lead">Run</td><td>Every paid call → one ledger entry</td><td>Caps, kill-switch, weekly reconciliation</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><strong>Every paid call writes one ledger entry</strong> — if it's not in the ledger, it didn't happen.</li>
+          <li><strong>Caps</strong>: warn 70% → squeeze 90% → vendor stop 100%. A stop is loud, never silent.</li>
+          <li><strong>Weekly reconciliation</strong> vs vendor consoles (±5% tolerance; investigate same day).</li>
+          <li><strong>Margin sheet per client</strong> — machine cost + analyst hours vs. price (the 21/33/52% margins).</li>
+        </ul>
+
+        <h3>Testing (the gates)</h3>
+        <ul>
+          <li><span class="mono">make ci</span> green — the finish line for every task.</li>
+          <li>The <strong>cross-tenant leakage test</strong> (tenant A can't read tenant B) — a release gate.</li>
+          <li>The <strong>D1 guard test</strong> (no forbidden column like is_bot) — fails the build.</li>
+          <li>Playwright for the dashboard; golden PDFs per Indic script; retention tests with fixture dates.</li>
+        </ul>
+
+        <div class="pager">
+          <a href="#step-11"><span class="lbl">Previous · Step 11</span><span class="ttl">Law, ethics &amp; security</span></a>
+          <a class="next" href="#step-13"><span class="lbl">Next · Step 13</span><span class="ttl">Selling, piloting &amp; open items</span></a>
+        </div>
+      </section>
+      <section id="step-13" class="step">
+        <div class="step-head">
+          <div class="kicker">Step 13 of 13</div>
+          <h2>Selling, piloting &amp; open items</h2>
+          <div class="spec">
+            <span class="chip mono-tag">18_GTM_AND_PILOT</span>
+            <span class="chip mono-tag">28_CONCIERGE_PILOT_KIT</span>
+            <span class="chip mono-tag">20_AUDIT_REPORT</span>
+          </div>
+          <div class="meta">The "so what do we do now" step: sell, pilot from week 6, and work the open items.</div>
+        </div>
+
+        <h3>The big idea</h3>
+        <p>Three things close the loop: <strong>selling</strong> (who buys and what we charge), <strong>piloting</strong> (how we start before the full product exists), and <strong>open items</strong> (what's still unproven and your first actions).</p>
+
+        <h3>Selling (recap from Step 1)</h3>
+        <ul>
+          <li><strong>Buyers</strong>: political consultancies (best channel) → PR agencies → state party units → brands (later).</li>
+          <li><strong>Packages</strong>: P1 Dashboard (₹25–60k) · P2 Managed (₹75k–3L) · P3 Campaign (₹2–10L) · P4 Event report (₹50k–2L).</li>
+          <li><strong>Margins</strong>: 21% (Tier S) / 33% (M) / 52% (L).</li>
+          <li><strong>Timing problem</strong>: a 12-week build ends mid-Jan 2027 — after most Feb–Mar party contracts. That's why the concierge pilot exists.</li>
+        </ul>
+
+        <h3>The concierge pilot (file 28) — the key concept</h3>
+        <p><strong>Concierge</strong> = the machine does the repeatable work (collecting, labelling, grouping), and a named analyst does the rest by hand (picking narratives, writing the brief, checking the embargo). The client sees a brief and numbers — not a dashboard yet. This lets pilots start in <strong>week 6</strong> instead of waiting for week 12.</p>
+        <ul>
+          <li>Aggregate-first, no handles, no profiles.</li>
+          <li><strong>No accuracy claims before CP-3 (end of week 7)</strong> — every brief says "early-stage labels, analyst-checked".</li>
+          <li>No vote prediction, no "poll" wording.</li>
+          <li>Manual embargo checklist on every brief.</li>
+          <li>A refusal is always logged.</li>
+        </ul>
+
+        <h4>The analyst's daily routine (~2 hours, 05:00–07:00 IST)</h4>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th style="width:130px">Time</th><th>What the analyst does</th></tr></thead>
+            <tbody>
+              <tr><td class="num">05:00</td><td>Data cut; check source health</td></tr>
+              <tr><td class="num">05:10–05:45</td><td>Open the CSV, spot-check 30–50 posts (sarcasm, Hinglish, random, edge cases), record errors</td></tr>
+              <tr><td class="num">05:45–06:10</td><td>Build the day's table (volume, net sentiment + interval, share of voice)</td></tr>
+              <tr><td class="num">06:10–06:45</td><td>Pick 3 narratives + 1 emerging issue; write "what changed"; add fact-check links</td></tr>
+              <tr><td class="num">06:45–06:55</td><td>Fill the quality footer; run the embargo checklist</td></tr>
+              <tr><td class="num">07:00</td><td>Deliver the one-page brief</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The <strong>query sheet</strong> (filled with the client before kickoff) locks down entities + aliases in every script, keywords/hashtags, geography, competitors, and sensitivities. The AI never invents aliases for living people.</p>
+        <div class="callout danger">
+          <div class="ct">The stop rules (when to walk away)</div>
+          <p>If a client asks for voter profiling, disinformation, bot networks, journalist surveillance, or a public "who's winning" poll during embargo — refuse in writing, end the pilot if pressed. Never negotiate on D1, D12 or D11.</p>
+        </div>
+
+        <h3>The audit &amp; open items (file 20)</h3>
+        <p>Two independent audits found <strong>10 critical, 27 important, 23 minor</strong> issues — all resolved (the specs are now consistent). But "resolved" means consistent, not proven.</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Type</th><th>Count</th><th>Examples</th></tr></thead>
+            <tbody>
+              <tr><td class="lead">Verifications (V1–V20)</td><td>20</td><td>Reseller trial, YouTube quota cost, Apify prices, the V8 pilot, counsel items</td></tr>
+              <tr><td class="lead">Founder decisions</td><td>16</td><td>Accept D3, budget tier, first pilot, hosting, email, analyst, advisor</td></tr>
+              <tr><td class="lead">Counsel items</td><td>10</td><td>DPA/AUP/charter review, DPDP role, embargo-time alerts</td></tr>
+              <tr><td class="lead">Builder items</td><td>14</td><td>Long-lead requests, demo banner, thresholds to calibrate</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Readiness verdict:</strong> everything is <strong>READY-WITH-GATES</strong> — except <strong>Legal</strong>, which is NOT ready for paid political contracts (but ready for concierge pilots on draft pilot terms). 14 of the 60 open items can block the first pilot in week 6.</p>
+
+        <h3>Your first 10 actions (this week)</h3>
+        <ol>
+          <li>Answer the 7 founder decisions (Step 1) → unblocks CP-0.</li>
+          <li>Choose hosting (GCP asia-south1 / AWS ap-south-1) and open the account/credits.</li>
+          <li>Open the X reseller accounts + YouTube API key; start the 3-day, 5-keyword trial (V1, V2).</li>
+          <li>Request annotation vendor quotes (Karya + 2) — the gate for CP-3.</li>
+          <li>Retain counsel and send the first batch (V13, V3, draft pilot terms, charter review).</li>
+          <li>File the long-lead requests (Meta review, YouTube quota, SES sandbox exit, trademark).</li>
+          <li>Start the political-advisor search + list 20 PR agencies (Track B).</li>
+          <li>Pick the analyst — the week-6 concierge pilot can't run without one.</li>
+          <li>Approve CP-0 and confirm the build start date.</li>
+          <li>Decide the email provider and the build billing model.</li>
+        </ol>
+
+        <h3>The whole picture (13 steps, 13 sentences)</h3>
+        <ol class="muted" style="font-size:14px;line-height:1.7">
+          <li>We sell <strong>managed social-listening intelligence</strong> for India — an answer, not a login.</li>
+          <li>The original guides had <strong>15 corrections</strong> — the model, costs, AI tools, and law.</li>
+          <li><strong>36 decisions</strong> (D1–D36) are the source of truth.</li>
+          <li><strong>3 personas, 16 features</strong>, 14 built in the MVP.</li>
+          <li><strong>One app + a queue</strong>, posts flow through 12 stages.</li>
+          <li>Data comes from <strong>sources + seed lists</strong> the AI never invents.</li>
+          <li><strong>One AI read per post</strong>, tiered, measured on human labels.</li>
+          <li><strong>One boring database</strong>, three iron rules, strict access.</li>
+          <li><strong>Numbers + charts + briefs</strong>, every number carrying a quality badge.</li>
+          <li><strong>Alerts + the 07:00 brief</strong>, statistically grounded, human-approved.</li>
+          <li><strong>Law + ethics + security</strong> — the trust layer, enforced as process.</li>
+          <li><strong>Six agents build it</strong>; you answer 7 questions and review gates.</li>
+          <li><strong>Sell, pilot from week 6</strong>, and work the 60 open items.</li>
+        </ol>
+
+        <div class="pager">
+          <a href="#step-12"><span class="lbl">Previous · Step 12</span><span class="ttl">Running &amp; building it</span></a>
+          <a class="next" href="#vision"><span class="lbl">Done — back to top</span><span class="ttl">Overview &amp; vision</span></a>
+        </div>
+      </section>
+
+      <footer>
+        <p><strong>How this document is built.</strong> We walk each step together in conversation first — I explain it, you ask questions to confirm your understanding — and only once you confirm do I write the step into this file, including any discussion we had.</p>
+        <p><strong>Caveats.</strong> All figures tagged [UNVERIFIED] are unchecked. Legal text here is research, not legal advice. The dashboard demo uses synthetic data with fictional parties and a fictional brand. Analysis of public social-media discussion — not an opinion poll, not a forecast, not what voters think.</p>
+        <div style="margin:14px 0 10px;padding:11px 13px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:12px;line-height:1.55;color:var(--text-2)"><strong>Proprietary &amp; confidential.</strong> © 2026 Avensar. All rights reserved. Avensar and Avensar Signal are proprietary marks of Avensar. This document, its design system, data model and source code are confidential and proprietary. No part may be copied, reproduced, distributed or used to build a competing product without prior written permission.</div>
+        <p class="muted">Avensar Signal · an Avensar product · generated <span class="num">18 Oct 2026</span> · light theme only (D13) · Avensar, Pune, India · ops@avensar.com</p>
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script>
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+    var sections = links.map(function(a){ return document.getElementById(a.getAttribute('data-sec')); });
+    var fill = document.getElementById('readbar-fill');
+
+    // Reading progress
+    function onScroll(){
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      if (fill && max > 0) fill.style.width = (h.scrollTop / max * 100) + '%';
+
+      // Scroll-spy
+      var pos = h.scrollTop + 90, current = links[0];
+      for (var i = 0; i < sections.length; i++){
+        if (sections[i] && sections[i].offsetTop <= pos) current = links[i];
+      }
+      links.forEach(function(a){ a.classList.remove('active'); });
+      if (current) current.classList.add('active');
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+</body>
+</html>
+
+

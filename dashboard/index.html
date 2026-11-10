@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light" />
+<title>Avensar Signal — CJP / Congress / AISA Social Monitor</title>
+<style>
+  :root{
+    --bg:#F7F5EF; --surface:#FFFFFF; --surface-2:#EFEBE1; --surface-3:#E6E0D3;
+    --border:#E2DCCF; --border-strong:#8C8678;
+    --ink:#1E1D1A; --text:#3A3730; --muted:#6B665C;
+    --accent:#C15F3C; --accent-text:#A8482A; --accent-soft:#FBEAE3;
+    --ok:#1E7B55; --ok-bg:#E6F3EC; --warn:#8A5A00; --warn-bg:#FFF3D6;
+    --bad:#B3261E; --bad-bg:#FBE9E7; --info:#1F6FB5; --info-bg:#E8F1FA;
+    --cjp:#C15F3C; --cong:#2A6FB0; --aisa:#6B4C9A;
+    --tg:#229ED9; --yt:#C4302B; --x:#1F1E1B; --ig:#C13584; --fb:#1877F2;
+    --font:Inter,"Segoe UI",system-ui,-apple-system,"Noto Sans Devanagari","Nirmala UI","Noto Sans",Roboto,sans-serif;
+    --serif:"Iowan Old Style","Palatino Linotype",Charter,Georgia,"Noto Serif Devanagari","Nirmala UI",serif;
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+    --r:14px; --r-sm:9px;
+    --sh:0 1px 2px rgba(30,29,26,.05),0 1px 1px rgba(30,29,26,.03);
+    --sh2:0 10px 30px -12px rgba(30,29,26,.18),0 2px 6px rgba(30,29,26,.05);
+    --side-w:236px; --top-h:56px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,p{margin:0}
+  a{color:var(--accent-text);text-underline-offset:2px}
+  a:hover{color:#8F3C22}
+  :focus-visible{outline:2px solid var(--info);outline-offset:2px;border-radius:6px}
+  .mono{font-family:var(--mono);font-size:.85em}
+  .num{font-variant-numeric:tabular-nums}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* top bar */
+  .topbar{position:fixed;top:0;left:0;right:0;height:var(--top-h);z-index:60;display:flex;align-items:center;gap:12px;padding:0 20px;background:rgba(247,245,239,.95);backdrop-filter:saturate(1.1) blur(10px);border-bottom:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:9px;min-width:0}
+  .mark{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;font-size:12px;font-weight:800;letter-spacing:-.03em}
+  .brand .name{font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+  .brand .name span{color:var(--accent-text)}
+  .avensar-chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--ink);color:#F3F0E8;font-size:9.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+  .avensar-chip i{width:5px;height:5px;border-radius:50%;background:var(--accent);display:inline-block}
+  .top-sep{width:1px;height:20px;background:var(--border);margin:0 2px}
+  .top-title{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .spacer{flex:1}
+  .top-search{position:relative;width:300px;max-width:32vw}
+  .top-search input{width:100%;height:32px;border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:0 10px 0 30px;font:inherit;font-size:12px;color:var(--ink)}
+  .top-search input::placeholder{color:#948D80}
+  .top-search .sicon{position:absolute;left:9px;top:7px;width:14px;height:14px;color:var(--muted);pointer-events:none}
+  .search-results{position:absolute;top:38px;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--sh2);overflow:hidden;display:none;z-index:70}
+  .search-results.open{display:block}
+  .sr-item{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--border);background:transparent;padding:9px 11px;font:inherit;cursor:pointer}
+  .sr-item:last-child{border-bottom:0}
+  .sr-item:hover{background:var(--surface-2)}
+  .sr-item .t{font-size:12px;font-weight:600;color:var(--ink);display:block;line-height:1.35}
+  .sr-item .m{font-size:10.5px;color:var(--muted);display:block;margin-top:2px}
+  .fetch-badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--ok-bg);color:var(--ok);font-size:10.5px;font-weight:700;white-space:nowrap}
+  .fetch-badge b{font-weight:800}
+  .icon-btn{height:30px;padding:0 10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:7px;font:inherit;font-size:11px;font-weight:600;cursor:pointer}
+  .icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+
+  /* shell */
+  .shell{display:grid;grid-template-columns:var(--side-w) 1fr;max-width:1420px;margin:0 auto;padding-top:var(--top-h)}
+  .side{position:sticky;top:var(--top-h);align-self:start;height:calc(100vh - var(--top-h));overflow-y:auto;padding:18px 12px 24px;border-right:1px solid var(--border);background:linear-gradient(180deg,#F3F0E8 0%,#F7F5EF 70%)}
+  .side-label{font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:4px 10px 8px}
+  .nav{display:flex;align-items:center;gap:9px;width:100%;border:1px solid transparent;background:transparent;color:var(--text);font:inherit;font-size:12.5px;font-weight:600;text-align:left;padding:8px 9px;border-radius:8px;cursor:pointer;margin-bottom:1px}
+  .nav:hover{background:var(--surface-2);color:var(--ink)}
+  .nav.active{background:var(--surface);border-color:var(--border);color:var(--accent-text);box-shadow:var(--sh)}
+  .nav svg{width:16px;height:16px;flex:0 0 16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+  .nav .count{margin-left:auto;font-size:9.5px;font-weight:700;color:var(--muted);background:var(--surface-2);border-radius:4px;padding:1px 5px}
+  .nav.active .count{background:var(--accent-soft);color:var(--accent-text)}
+  .side-div{height:1px;background:var(--border);margin:12px 8px}
+  .side-note{font-size:10.5px;line-height:1.45;color:var(--muted);padding:0 10px;margin:10px 0}
+  .side-note b{color:var(--text)}
+  .legend{display:flex;flex-direction:column;gap:5px;padding:0 10px;margin-top:8px}
+  .legend span{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted)}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:0 0 7px}
+  .dot.cjp{background:var(--cjp)} .dot.cong{background:var(--cong)} .dot.aisa{background:var(--aisa)}
+  .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)}
+
+  main{padding:32px 40px 64px;min-width:0}
+  .view{display:none;max-width:1080px}
+  .view.active{display:block}
+  .page-head{margin-bottom:22px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--accent-text);margin-bottom:10px}
+  .eyebrow::before{content:"";width:20px;height:2px;background:var(--accent);border-radius:2px}
+  .page-head h1{font-size:36px;line-height:1.08;letter-spacing:-.03em;font-weight:650;margin-bottom:8px}
+  .page-head h1 .soft{color:var(--accent-text)}
+  .page-head .lede{font-family:var(--serif);font-size:17.5px;line-height:1.55;color:var(--text);max-width:760px;margin-bottom:12px}
+  .head-meta{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  .pill{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:10.5px;font-weight:650;color:var(--muted);white-space:nowrap}
+  .pill.ok{background:var(--ok-bg);border-color:#CBE5D6;color:var(--ok)}
+  .pill.warn{background:var(--warn-bg);border-color:#F0DEAC;color:var(--warn)}
+  .pill.bad{background:var(--bad-bg);border-color:#F2CCC8;color:var(--bad)}
+  .pill.accent{background:var(--accent-soft);border-color:#F3CFC0;color:var(--accent-text)}
+
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin:18px 0}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 13px 12px;box-shadow:var(--sh);position:relative;overflow:hidden}
+  .kpi::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--accent)}
+  .kpi.cjp::before{background:var(--cjp)} .kpi.cong::before{background:var(--cong)} .kpi.aisa::before{background:var(--aisa)}
+  .kpi.tg::before{background:var(--tg)} .kpi.yt::before{background:var(--yt)} .kpi.n::before{background:var(--ink)}
+  .kpi .v{font-size:25px;line-height:1.05;font-weight:650;letter-spacing:-.03em;margin-bottom:3px}
+  .kpi .l{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);line-height:1.3}
+  .kpi .s{font-size:10.5px;color:var(--text);margin-top:4px;line-height:1.35}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh);min-width:0}
+  .grid > *{min-width:0}
+  .card h2{font-size:15px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
+  .card .sub{font-size:11.5px;color:var(--muted);margin-bottom:12px}
+  .card h3{font-size:13.5px;font-weight:700;margin:16px 0 8px}
+  .grid{display:grid;gap:12px;margin:14px 0}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g5{grid-template-columns:repeat(5,1fr)}
+  .g23{grid-template-columns:2fr 1fr}
+  .g32{grid-template-columns:1.2fr .8fr}
+
+  .platform-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:8px;min-height:130px}
+  .pc-head{display:flex;align-items:center;gap:8px}
+  .pc-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;letter-spacing:-.02em;flex:0 0 28px}
+  .pc-icon.ig{background:var(--ig)} .pc-icon.x{background:var(--x)} .pc-icon.tg{background:var(--tg)} .pc-icon.yt{background:var(--yt)} .pc-icon.fb{background:var(--fb)}
+  .pc-head b{font-size:12.5px;display:block}
+  .pc-head span{font-size:9.5px;color:var(--muted);display:block;margin-top:1px}
+  .pc-main{font-size:21px;font-weight:650;letter-spacing:-.02em;line-height:1.1}
+  .pc-main small{font-size:10.5px;font-weight:600;color:var(--muted);letter-spacing:0}
+  .pc-rows{display:flex;flex-direction:column;gap:3px;margin-top:auto}
+  .pc-row{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:var(--text)}
+  .pc-row b{font-weight:650;color:var(--ink);font-variant-numeric:tabular-nums}
+  .pc-note{font-size:9.5px;line-height:1.35;color:var(--muted);border-top:1px solid var(--border);padding-top:6px}
+
+  .donut-wrap{display:flex;align-items:center;gap:18px}
+  .donut{width:138px;height:138px;border-radius:50%;position:relative;flex:0 0 138px}
+  .donut::after{content:"";position:absolute;inset:25px;border-radius:50%;background:var(--surface)}
+  .donut .centre{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;text-align:center}
+  .donut .centre b{font-size:22px;font-weight:650;letter-spacing:-.03em;line-height:1}
+  .donut .centre span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:3px}
+  .legend2{display:flex;flex-direction:column;gap:7px;min-width:0}
+  .legend2 .row{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text)}
+  .legend2 .row b{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:650;color:var(--ink)}
+  .sw{width:9px;height:9px;border-radius:2px;flex:0 0 9px}
+
+  .bars{display:flex;flex-direction:column;gap:9px}
+  .bar-row{display:grid;grid-template-columns:92px minmax(0,1fr) 54px;gap:8px;align-items:center}
+  .bar-row .bl{font-size:10.5px;color:var(--text);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar-track{height:9px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+  .bar-fill{height:100%;border-radius:5px;background:var(--accent)}
+  .bar-row .bv{font-size:10px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  .chart-bars{display:flex;align-items:flex-end;gap:4px;height:130px;padding-top:8px;border-bottom:1px solid var(--border)}
+  .cb{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;position:relative;min-width:0}
+  .cb .bar{width:100%;max-width:26px;background:var(--tg);border-radius:3px 3px 0 0;min-height:2px;opacity:.85}
+  .cb:hover .bar{opacity:1;background:var(--accent)}
+  .cb .lab{font-size:8.5px;color:var(--muted);margin-top:4px;white-space:nowrap;height:14px}
+  .cb .tip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:9.5px;padding:4px 6px;border-radius:5px;white-space:nowrap;z-index:5;margin-bottom:4px}
+  .cb:hover .tip{display:block}
+  .chart-foot{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:4px}
+
+  .mini-list{display:flex;flex-direction:column;gap:0}
+  .mini-item{padding:10px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;min-width:0}
+  .mini-item:last-child{border-bottom:0;padding-bottom:0}
+  .mini-item:first-child{padding-top:0}
+  .mini-item .mt{font-size:11.5px;line-height:1.45;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;min-width:0}
+  .mini-item .mm{font-size:10px;color:var(--muted);margin-top:3px}
+  .mini-item .mv{font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
+  .mini-item .mv span{display:block;font-size:8.5px;font-weight:600;color:var(--muted);text-align:right;margin-top:1px}
+
+  .feed-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+  .input{height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:0 11px;font:inherit;font-size:12px;color:var(--ink);min-width:210px;flex:1}
+  .select{height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:0 8px;font:inherit;font-size:11.5px;color:var(--text)}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{height:28px;padding:0 9px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:7px;font:inherit;font-size:10.5px;font-weight:650;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .chip:hover{background:var(--surface-2)}
+  .chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
+  .chip .n{font-size:9px;opacity:.7;font-variant-numeric:tabular-nums}
+  .result-line{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:var(--muted);margin:10px 0 8px}
+
+  .feed{display:flex;flex-direction:column;gap:9px}
+  .feed-item{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 14px;box-shadow:var(--sh)}
+  .feed-item:hover{border-color:#CFC6B4}
+  .fi-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+  .pbadge{display:inline-flex;align-items:center;height:19px;padding:0 6px;border-radius:4px;font-size:9px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:#fff;white-space:nowrap}
+  .pbadge.tg{background:var(--tg)} .pbadge.yt{background:var(--yt)} .pbadge.x{background:var(--x)} .pbadge.ig{background:var(--ig)} .pbadge.fb{background:var(--fb)}
+  .acct{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+  .fi-top time{font-size:10px;color:var(--muted);margin-left:auto;white-space:nowrap}
+  .fi-top .open{font-size:10px;font-weight:650;white-space:nowrap}
+  .fi-text{font-size:12.5px;line-height:1.55;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
+  .fi-text.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .fi-more{border:0;background:transparent;padding:3px 0 0;color:var(--accent-text);font:inherit;font-size:10.5px;font-weight:650;cursor:pointer}
+  .fi-metrics{display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+  .fi-metrics b{color:var(--text);font-weight:650;font-variant-numeric:tabular-nums}
+  .load-more{display:block;width:100%;margin:12px 0 0;height:36px;border:1px dashed var(--border-strong);background:transparent;border-radius:9px;font:inherit;font-size:11.5px;font-weight:650;color:var(--text);cursor:pointer}
+  .load-more:hover{background:var(--surface-2)}
+
+  .profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
+  .profile-card{border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:13px;box-shadow:var(--sh)}
+  .pc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .pc-top .pbadge{height:18px}
+  .pc-top .handle{font-size:11.5px;font-weight:650;color:var(--ink);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis}
+  .pc-stats{display:flex;gap:14px;flex-wrap:wrap;margin:7px 0 5px}
+  .pc-stat b{display:block;font-size:16px;font-weight:650;letter-spacing:-.02em;line-height:1.1}
+  .pc-stat span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:1px}
+  .pc-bio{font-size:10.5px;line-height:1.45;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .pc-links{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:8px;padding-top:7px;border-top:1px solid var(--border);font-size:9.5px;color:var(--muted)}
+  .pc-links a{font-weight:650}
+
+  .stats-row{display:flex;flex-wrap:wrap;gap:18px;margin:8px 0 4px}
+  .stat b{display:block;font-size:23px;font-weight:650;letter-spacing:-.03em;line-height:1.05}
+  .stat span{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:2px}
+
+  .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:11px;background:var(--surface);box-shadow:var(--sh);margin:12px 0}
+  table{width:100%;border-collapse:collapse;min-width:600px;font-size:11.5px;line-height:1.45}
+  th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--border)}
+  th{background:var(--surface-2);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#FCFBF7}
+  td .sub{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+  .status{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:4px;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  .status.ok{background:var(--ok-bg);color:var(--ok)}
+  .status.partial{background:var(--warn-bg);color:var(--warn)}
+  .status.blocked{background:var(--bad-bg);color:var(--bad)}
+  .status.unavailable{background:var(--surface-2);color:var(--muted)}
+
+  .callout{border-radius:11px;padding:13px 15px;margin:12px 0;border:1px solid var(--border);background:var(--surface)}
+  .callout .lab{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+  .callout p{font-size:11.5px;line-height:1.5;color:var(--text)}
+  .callout p:last-child{margin-bottom:0}
+  .callout.key{background:#FFFCF8;border-color:#EDD6C8}.callout.key .lab{color:var(--accent-text)}
+  .callout.warn{background:var(--warn-bg);border-color:#EAD7A6}.callout.warn .lab{color:var(--warn)}
+  .callout.bad{background:var(--bad-bg);border-color:#F2CCC8}.callout.bad .lab{color:var(--bad)}
+  .callout.ok{background:var(--ok-bg);border-color:#CBE5D6}.callout.ok .lab{color:var(--ok)}
+
+  .actor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+  .actor-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;box-shadow:var(--sh)}
+  .actor-band{height:5px}
+  .actor-card.cjp .actor-band{background:var(--cjp)} .actor-card.cong .actor-band{background:var(--cong)} .actor-card.aisa .actor-band{background:var(--aisa)}
+  .actor-inner{padding:14px}
+  .actor-inner h2{font-size:14.5px;margin-bottom:2px}
+  .actor-inner .role{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+  .actor-card.cjp .role{color:var(--cjp)} .actor-card.cong .role{color:var(--cong)} .actor-card.aisa .role{color:var(--aisa)}
+  .actor-inner .note{font-size:10.5px;line-height:1.45;color:var(--muted);margin-bottom:10px;min-height:44px}
+  .actor-rows{display:flex;flex-direction:column;gap:0}
+  .actor-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--border);font-size:10.5px;color:var(--text)}
+  .actor-row b{font-weight:650;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .actor-foot{margin-top:9px;font-size:9.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+
+  .method-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  .method-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px;box-shadow:var(--sh)}
+  .method-card h3{font-size:13px;margin-bottom:5px}
+  .method-card p,.method-card li{font-size:11.5px;line-height:1.5;color:var(--text)}
+  .method-card ul{padding-left:17px;margin:6px 0 0}
+  .method-card li{margin-bottom:4px}
+  .method-card li::marker{color:var(--accent)}
+
+  .empty{padding:26px;text-align:center;color:var(--muted);font-size:12px;border:1px dashed var(--border);border-radius:11px}
+
+  .footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);line-height:1.55}
+  .footer b{color:var(--text)}
+  .footer-brand{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+  .footer-brand .mark{width:28px;height:28px;background:var(--ink);color:#fff;border-radius:7px}
+  .footer-brand .fb-name{font-size:13px;font-weight:700;color:var(--ink);line-height:1.2}
+  .footer-brand .fb-name span{display:block;font-size:9px;font-weight:600;color:var(--accent-text);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+  .proprietary{margin:10px 0 8px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);font-size:10px;line-height:1.5;color:var(--text-2)}
+  .proprietary b{color:var(--ink)}
+  .footer-contact{font-size:9.5px;color:var(--muted)}
+
+  @media (max-width:1180px){
+    .kpis{grid-template-columns:repeat(3,1fr)}
+    .g5{grid-template-columns:repeat(3,1fr)}
+    .top-search{width:230px}
+  }
+  @media (max-width:960px){
+    .shell{grid-template-columns:1fr}
+    .side{position:static;height:auto;display:flex;overflow-x:auto;gap:4px;padding:8px 12px;border-right:0;border-bottom:1px solid var(--border);background:var(--bg)}
+    .side-label,.side-div,.side-note,.legend{display:none}
+    .nav{width:auto;white-space:nowrap;margin:0;padding:7px 9px}
+    .nav .count{display:none}
+    main{padding:24px 20px 48px}
+    .g2,.g3,.g23,.g32,.actor-grid,.profile-grid,.method-grid{grid-template-columns:1fr}
+    .g5{grid-template-columns:1fr 1fr}
+    .top-search{display:none}
+    .avensar-chip{display:none}
+  }
+  @media (max-width:640px){
+    .topbar{padding:0 12px;gap:8px}
+    .top-title,.top-sep,.fetch-badge{display:none}
+    .kpis{grid-template-columns:1fr 1fr}
+    .g5{grid-template-columns:1fr}
+    .page-head h1{font-size:29px}
+    .page-head .lede{font-size:16px}
+    .donut-wrap{flex-direction:column;align-items:flex-start}
+  }
+  @media print{
+    .topbar,.side,.feed-tools,.load-more,.chip,.icon-btn,.top-search{display:none!important}
+    .shell{display:block;padding-top:0}
+    main{padding:0;max-width:none}
+    .view{display:none!important}
+    .view.active{display:block!important;max-width:none}
+    body{background:#fff;font-size:10pt}
+    .card,.kpi,.platform-card,.feed-item,.actor-card,.method-card{box-shadow:none;break-inside:avoid}
+    .table-wrap{overflow:visible}
+    table{min-width:0;font-size:8pt}
+    a{color:inherit;text-decoration:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark">AS</span>
+    <div class="name">Avensar <span>Signal</span></div>
+  </div>
+  <span class="avensar-chip"><i></i>An Avensar product</span>
+  <div class="top-sep"></div>
+  <div class="top-title" id="topTitle">Overview</div>
+  <div class="spacer"></div>
+  <div class="top-search">
+    <svg class="sicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="globalSearch" type="search" placeholder="Search fetched items…" autocomplete="off" aria-label="Search fetched items" />
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <div class="fetch-badge" id="fetchBadge">Fetched <b>5 Nov 2026</b></div>
+  <button class="icon-btn" onclick="window.print()">Print</button>
+</div>
+
+<div class="shell">
+  <aside class="side">
+    <div class="side-label">Monitor</div>
+    <button class="nav active" data-view="overview">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </button>
+    <button class="nav" data-view="feed">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      Feed <span class="count" id="navFeedCount">177</span>
+    </button>
+    <button class="nav" data-view="platforms">
+      <svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
+      Platforms
+    </button>
+    <button class="nav" data-view="actors">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.4-5.5 5.5-5.5s5.5 2.2 5.5 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.6c2.6.2 4.5 2.1 4.5 5"/></svg>
+      Actors
+    </button>
+    <button class="nav" data-view="collection">
+      <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7" ry="2.8"/><path d="M5 5.5v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-6"/><path d="M5 11.5v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-6"/></svg>
+      Collection log
+    </button>
+    <button class="nav" data-view="method">
+      <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>
+      Method
+    </button>
+    <div class="side-div"></div>
+    <div class="side-note"><b>Public data only.</b> No login, no private groups, no synthetic posts. Blocked endpoints are reported, not filled.</div>
+    <div class="legend">
+      <span><i class="dot cjp"></i> CJP</span>
+      <span><i class="dot cong"></i> Congress / INDIA</span>
+      <span><i class="dot aisa"></i> AISA / Neha Bora</span>
+    </div>
+    <div class="side-note" style="margin-top:14px">Profile counts and post metrics are as displayed at fetch time. They change continuously.</div>
+  </aside>
+
+  <main id="main">
+    <!-- OVERVIEW -->
+    <section class="view active" id="view-overview">
+      <div class="page-head">
+        <div class="eyebrow">Fetched social-media snapshot · 5 Nov 2026</div>
+        <h1>Three actors. <span class="soft">One public record.</span></h1>
+        <p class="lede">Every follower count, post and view below was read from a public platform page on 5 November 2026. Where Instagram, Facebook or Reddit blocked the fetch, the dashboard says so — it does not fill the gap with an estimate.</p>
+        <div class="head-meta">
+          <span class="pill accent">15 profiles</span>
+          <span class="pill"><b class="num" id="pillItems">177</b>&nbsp;fetched items</span>
+          <span class="pill ok">3 platforms with post-level data</span>
+          <span class="pill warn">5 partial endpoints</span>
+          <span class="pill bad">2 blocked</span>
+        </div>
+      </div>
+
+      <div class="kpis" id="kpis"></div>
+
+      <div class="card" style="margin-top:2px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div><h2>Platform footprint</h2><div class="sub">What each platform actually exposed to a logged-out fetch. Figures are per account, not additive.</div></div>
+          <span class="pill">Fetched <span id="fetchTimeShort">—</span></span>
+        </div>
+        <div class="grid g5" id="platformCards"></div>
+      </div>
+
+      <div class="grid g23">
+        <div class="card">
+          <h2>Telegram activity, week by week</h2>
+          <div class="sub">125 public messages from @thecockroachchannel · 28 May – 6 Oct 2026</div>
+          <div class="chart-bars" id="tgWeekly"></div>
+          <div class="chart-foot"><span>Bar height = messages / week</span><span id="tgWeeklyTotal">—</span></div>
+        </div>
+        <div class="card">
+          <h2>What was fetched</h2>
+          <div class="sub">177 items across three platforms with post-level data.</div>
+          <div class="donut-wrap">
+            <div class="donut" id="mixDonut"><div class="centre"><b id="mixTotal">177</b><span>items</span></div></div>
+            <div class="legend2" id="mixLegend"></div>
+          </div>
+          <div class="callout warn" style="margin-top:14px;padding:10px 12px">
+            <div class="lab">Not shown</div>
+            <p>Instagram posts, Facebook posts and Reddit are missing by platform block, not by choice. The feed contains only what was returned.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <h2>Most-viewed Telegram messages</h2>
+          <div class="sub">Views as shown on the public channel preview.</div>
+          <div class="mini-list" id="topTg"></div>
+        </div>
+        <div class="card">
+          <h2>Most-viewed YouTube videos</h2>
+          <div class="sub">Latest 15 uploads per channel, ranked by views.</div>
+          <div class="mini-list" id="topYt"></div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <h2>Latest activity fetched</h2>
+          <div class="sub">Newest records across Telegram, YouTube and X.</div>
+          <div class="mini-list" id="latestFeed"></div>
+        </div>
+        <div class="card">
+          <h2>Collection status</h2>
+          <div class="sub">What worked, what was partial, what was blocked.</div>
+          <div class="bars" id="collectionBars"></div>
+          <div class="callout bad" style="margin-top:14px;padding:10px 12px">
+            <div class="lab">The honest gaps</div>
+            <p>Instagram post feed: 404/login. Facebook metrics: login wall. Reddit: 403. WhatsApp: no public API. These are not zeroes — they are unknowns.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEED -->
+    <section class="view" id="view-feed">
+      <div class="page-head">
+        <div class="eyebrow">The corpus</div>
+        <h1>The feed, as fetched.</h1>
+        <p class="lede">Every record below is a public post, message or video returned during the 5 November 2026 capture. No generated text, no inferred posts, no “representative sample”.</p>
+        <div class="head-meta">
+          <span class="pill" id="feedCountPill">177 items</span>
+          <span class="pill">Telegram · YouTube · X</span>
+          <span class="pill">Newest first</span>
+        </div>
+      </div>
+
+      <div class="feed-tools">
+        <input class="input" id="feedSearch" type="search" placeholder="Search text or account…" aria-label="Search feed" />
+        <select class="select" id="feedSort" aria-label="Sort feed">
+          <option value="new">Newest first</option>
+          <option value="old">Oldest first</option>
+          <option value="views">Most viewed</option>
+        </select>
+      </div>
+      <div class="feed-tools" style="margin-top:0">
+        <div class="chips" id="platformChips"></div>
+        <div class="chips" id="actorChips"></div>
+      </div>
+      <div class="result-line"><span id="feedResultLine">—</span><span>Showing a page at a time</span></div>
+      <div class="feed" id="feedList"></div>
+      <button class="load-more" id="loadMore" type="button">Load more</button>
+      <div class="empty" id="feedEmpty" hidden>No records match those filters.</div>
+    </section>
+
+    <!-- PLATFORMS -->
+    <section class="view" id="view-platforms">
+      <div class="page-head">
+        <div class="eyebrow">Platform by platform</div>
+        <h1>What each door opened.</h1>
+        <p class="lede">The same capture, split by platform. Profile counts come from the public profile surface; post-level data comes only where the platform returned it.</p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div><h2>Instagram</h2><div class="sub">4 public profiles · profile metadata only · post feed login-walled</div></div>
+          <span class="pill warn">Posts: blocked</span>
+        </div>
+        <div class="profile-grid" id="igProfiles"></div>
+        <div class="callout warn" style="margin-bottom:0">
+          <div class="lab">What is missing</div>
+          <p>Instagram returned follower, following and post counts plus the bio. It did not return the post grid or captions to a logged-out request. The dashboard therefore reports profile size, not posting activity, for Instagram.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div><h2>X / Twitter</h2><div class="sub">5 public profiles · 7 dated posts with public metrics · 5 undated profile posts</div></div>
+          <span class="pill warn">Follower counts: 3 not exposed</span>
+        </div>
+        <div class="profile-grid" id="xProfiles"></div>
+        <h3 style="font-size:12px;margin:16px 0 6px">Recent posts fetched</h3>
+        <div class="feed" id="xFeed"></div>
+        <h3 style="font-size:12px;margin:16px 0 6px">Undated posts captured</h3>
+        <div class="sub" style="margin:-2px 0 8px">X did not expose timestamps for these profile posts. They are kept separate rather than dated by guesswork.</div>
+        <div class="feed" id="xUndated"></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div><h2>Telegram</h2><div class="sub">@thecockroachchannel · 125 messages · 168K subscribers</div></div>
+          <span class="pill ok">Post-level: 125</span>
+        </div>
+        <div class="stats-row" id="tgStats"></div>
+        <div class="chart-bars" id="tgWeekly2" style="margin-top:12px"></div>
+        <div class="chart-foot"><span>Messages per week</span><span>28 May – 6 Oct 2026</span></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div><h2>YouTube</h2><div class="sub">3 channels · 45 latest videos · views and likes from the public feed</div></div>
+          <span class="pill ok">Post-level: 45</span>
+        </div>
+        <div class="profile-grid" id="ytProfiles"></div>
+        <div class="table-wrap" style="margin-bottom:0">
+          <table>
+            <thead><tr><th>Channel</th><th>Latest 15 videos: total views</th><th>Median views</th><th>Top video</th></tr></thead>
+            <tbody id="ytSummary"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h2>Facebook, Reddit and WhatsApp</h2>
+        <div class="sub">What a logged-out fetch could and could not see.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Platform</th><th>What we got</th><th>What we did not get</th><th>Status</th></tr></thead>
+            <tbody id="otherPlatforms"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTORS -->
+    <section class="view" id="view-actors">
+      <div class="page-head">
+        <div class="eyebrow">The three actors</div>
+        <h1>CJP, Congress, AISA / Neha.</h1>
+        <p class="lede">The same platform data, grouped by actor. Follower counts are account-level and overlap heavily; they are not a vote, a membership figure or a unique audience.</p>
+      </div>
+      <div class="actor-grid" id="actorCards"></div>
+
+      <div class="card" style="margin-top:12px">
+        <h2>Side by side</h2>
+        <div class="sub">Only fetched values are shown. “n/e” means the platform did not expose the count.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Signal</th><th>CJP</th><th>Congress</th><th>AISA / Neha</th></tr></thead>
+            <tbody id="actorCompare"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="callout key">
+        <div class="lab">Reading the actor view</div>
+        <p>A 25M Instagram following is not 25M supporters, and a 168K Telegram channel is not a party membership. These are the sizes of the public accounts that were fetched. The dashboard deliberately does not convert them into support, reach or votes.</p>
+      </div>
+    </section>
+
+    <!-- COLLECTION -->
+    <section class="view" id="view-collection">
+      <div class="page-head">
+        <div class="eyebrow">Provenance</div>
+        <h1>The collection log.</h1>
+        <p class="lede">Each row is one endpoint we tried. “Records” means rows actually returned, not the platform's total. A blocked endpoint is recorded as blocked — never as zero activity.</p>
+        <div class="head-meta">
+          <span class="pill ok"><b id="colOk">—</b>&nbsp;ok</span>
+          <span class="pill warn"><b id="colPartial">—</b>&nbsp;partial</span>
+          <span class="pill bad"><b id="colBlocked">—</b>&nbsp;blocked</span>
+          <span class="pill"><b id="colUnavailable">—</b>&nbsp;unavailable</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Endpoints attempted</h2>
+        <div class="sub">Capture time: <span id="collectionTime">—</span>. All requests were logged-out and public.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Platform</th><th>Endpoint</th><th>Status</th><th>Records</th><th>Note</th></tr></thead>
+            <tbody id="collectionTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="callout bad">
+          <div class="lab">Blocked, not zero</div>
+          <p>Instagram post/reel feed, Facebook page metrics and Reddit all returned access walls. Treating those as “no conversation” would be a data error. The dashboard leaves them blank and labels them.</p>
+        </div>
+        <div class="callout warn">
+          <div class="lab">Partial, not complete</div>
+          <p>X profiles for CJP, Neha and Dipke did not expose follower counts to a logged-out fetch. The post counts and post text are still shown; the missing follower number is marked “n/e”.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- METHOD -->
+    <section class="view" id="view-method">
+      <div class="page-head">
+        <div class="eyebrow">Method</div>
+        <h1>How this was fetched.</h1>
+        <p class="lede">A short, inspectable method: public pages only, one capture time, explicit gaps, and no synthetic records. If a number is not in the source, it is not in the dashboard.</p>
+        <div class="head-meta">
+          <span class="pill">Capture: <span id="methodTime">—</span></span>
+          <span class="pill">177 records</span>
+          <span class="pill">No estimates</span>
+        </div>
+      </div>
+
+      <div class="method-grid">
+        <div class="method-card">
+          <h3>What was fetched</h3>
+          <ul>
+            <li>Instagram public profile metadata for 4 accounts.</li>
+            <li>X public profiles for 5 accounts, plus 7 dated posts with public metrics and 5 undated profile posts.</li>
+            <li>Telegram public channel preview: 125 messages.</li>
+            <li>YouTube channel about pages and the latest 15 videos for 3 channels.</li>
+            <li>Facebook page titles for 2 pages; no counts or posts.</li>
+          </ul>
+        </div>
+        <div class="method-card">
+          <h3>How it was fetched</h3>
+          <ul>
+            <li>Logged-out HTTP requests only. No account, cookie or token was used.</li>
+            <li>Instagram profile metadata came from the public link-preview surface.</li>
+            <li>X profiles and posts were read through a rendered public page.</li>
+            <li>Telegram came from the official <span class="mono">t.me/s/</span> preview.</li>
+            <li>YouTube came from the public about page and RSS feed.</li>
+          </ul>
+        </div>
+        <div class="method-card">
+          <h3>What is counted</h3>
+          <ul>
+            <li><b>Followers / subscribers:</b> as displayed at fetch time.</li>
+            <li><b>Posts:</b> account post count, or fetched items where marked.</li>
+            <li><b>Views:</b> as displayed on the post/message/video.</li>
+            <li><b>Items:</b> one row per fetched message, video or post.</li>
+            <li><b>n/e:</b> not exposed by the platform.</li>
+          </ul>
+        </div>
+        <div class="method-card">
+          <h3>What is not</h3>
+          <ul>
+            <li>No reach, impressions or unique audience.</li>
+            <li>No sentiment, stance or bot classification.</li>
+            <li>No estimate for blocked Instagram/Facebook/Reddit data.</li>
+            <li>No claim that followers equal supporters or votes.</li>
+            <li>No private groups, DMs or WhatsApp content.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout key">
+        <div class="lab">The integrity rule</div>
+        <p>Every record carries a platform, account, timestamp (where exposed), source URL and capture time. If a platform did not return a field, the dashboard shows “n/e” or a blocked status. There are no placeholder posts, no synthetic engagement figures and no extrapolated totals.</p>
+      </div>
+
+      <div class="card">
+        <h2>Refresh recipe</h2>
+        <div class="sub">Repeat the same logged-out capture and rebuild the dataset; do not mix capture dates.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Step</th><th>What to request</th><th>What to store</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Instagram public profile for each handle</td><td>followers, following, posts, bio, capture time, URL</td></tr>
+              <tr><td>2</td><td>X public profile and recent post pages</td><td>followers (if shown), post count, post text, metrics, timestamp</td></tr>
+              <tr><td>3</td><td>Telegram <span class="mono">t.me/s/&lt;channel&gt;</span>, paginate with <span class="mono">?before=</span></td><td>message id, text, datetime, views, media, URL</td></tr>
+              <tr><td>4</td><td>YouTube channel about + RSS</td><td>subscriber count, total views, joined date, video id/title/date/views/likes</td></tr>
+              <tr><td>5</td><td>Blocked endpoints</td><td>status code and note — never a substituted number</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="lab">Limits of this snapshot</div>
+        <p>This is one capture, not a time series. Instagram and Facebook post-level data are missing; X exposes only recent posts for two accounts; Telegram's public preview ends on 6 October 2026. The 177 items are a window into public activity, not the whole conversation.</p>
+      </div>
+    </section>
+
+    <div class="footer">
+      <div class="footer-brand">
+        <span class="mark">AS</span>
+        <div class="fb-name">Avensar Signal<span>An Avensar product</span></div>
+      </div>
+      <div class="proprietary"><b>Proprietary &amp; confidential.</b> © 2026 Avensar. All rights reserved. Avensar and Avensar Signal are proprietary marks of Avensar. This dashboard, its design system, data model, analysis logic and source code are confidential and proprietary. No part may be copied, reproduced, distributed, sublicensed or used to build a competing product without prior written permission.</div>
+      <p><b>CJP / Congress / AISA — fetched social monitor.</b> Built from <span class="mono">social-data.js</span>. Public data only; no login, no private content, no synthetic records. Platform counts change continuously and are shown as captured, not as current totals.</p>
+      <p class="footer-contact">Avensar · Pune, Maharashtra, India · ops@avensar.com · avensar.com</p>
+    </div>
+  </main>
+</div>
+
+<script src="social-data.js"></script>
+<script>
+(function(){
+  if(!window.CJP_SOCIAL){ document.body.innerHTML = '<div style="padding:40px;font-family:system-ui">social-data.js did not load. Open this file from the CJP folder.</div>'; return; }
+  const D = window.CJP_SOCIAL;
+  const $ = (id) => document.getElementById(id);
+  const posts = D.posts.slice();
+  const profiles = D.profiles.slice();
+
+  const PLAT = { Telegram:'tg', YouTube:'yt', X:'x', Instagram:'ig', Facebook:'fb' };
+  const ACTOR = Object.fromEntries(D.actors.map(a => [a.id, a]));
+  const compact = (n) => {
+    if(n == null) return '—';
+    if(n >= 1e9) return (n/1e9).toFixed(n >= 1e10 ? 1 : 2).replace(/\.0+$/,'') + 'B';
+    if(n >= 1e6) return (n/1e6).toFixed(n >= 1e7 ? 1 : 2).replace(/\.0+$/,'') + 'M';
+    if(n >= 1e3) return (n/1e3).toFixed(n >= 1e4 ? 1 : 1).replace(/\.0+$/,'') + 'K';
+    return String(n);
+  };
+  const full = (n) => n == null ? '—' : Number(n).toLocaleString('en-IN');
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const dt = (iso) => {
+    if(!iso) return '—';
+    const d = new Date(iso);
+    if(isNaN(d)) return iso;
+    return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'}) + ' · ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'});
+  };
+  const dtShort = (iso) => {
+    const d = new Date(iso);
+    if(isNaN(d)) return iso;
+    return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
+  };
+  const pbadge = (p) => `<span class="pbadge ${PLAT[p]||''}">${esc(p)}</span>`;
+  const actorDot = (id) => `<span class="dot ${id}"></span>`;
+
+  // header times
+  const fetched = new Date(D.meta.fetched_at);
+  const fetchLabel = fetched.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'}) + ', ' + fetched.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'}) + ' IST';
+  $('fetchTimeShort').textContent = fetchLabel;
+  $('collectionTime').textContent = fetchLabel;
+  $('methodTime').textContent = fetchLabel;
+  $('fetchBadge').innerHTML = 'Fetched <b>' + fetched.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + '</b>';
+  $('navFeedCount').textContent = posts.length;
+  $('pillItems').textContent = posts.length;
+  $('feedCountPill').textContent = posts.length + ' items';
+
+  // KPI cards
+  const ig = (actor) => profiles.find(p => p.platform === 'Instagram' && p.actor === actor);
+  const igNeha = profiles.find(p => p.id === 'ig-neha');
+  const igAisa = profiles.find(p => p.id === 'ig-aisa');
+  const yt = (actor) => profiles.find(p => p.platform === 'YouTube' && p.actor === actor);
+  const tg = profiles.find(p => p.platform === 'Telegram');
+  const tgPosts = posts.filter(p => p.platform === 'Telegram');
+  const tgViews = tgPosts.reduce((s,p) => s + (p.metrics?.views || 0), 0);
+  const kpis = [
+    { cls:'cjp', v: ig('cjp')?.followers_label || '—', l:'CJP · Instagram', s:(ig('cjp')?.posts ? full(ig('cjp').posts) + ' posts' : '') },
+    { cls:'cong', v: ig('congress')?.followers_label || '—', l:'Congress · Instagram', s:(ig('congress')?.posts ? compact(ig('congress').posts) + ' posts' : '') },
+    { cls:'aisa', v: igNeha?.followers_label || '—', l:'Neha Bora · Instagram', s:(igNeha?.posts ? full(igNeha.posts) + ' posts' : '') },
+    { cls:'tg', v: tg?.followers_label || '—', l:'CJP · Telegram', s:tgPosts.length + ' messages fetched' },
+    { cls:'tg', v: compact(tgViews), l:'Telegram views', s:'across 125 fetched messages' },
+    { cls:'n', v: posts.length, l:'Items fetched', s:'Telegram + YouTube + X' }
+  ];
+  $('kpis').innerHTML = kpis.map(k => `<div class="kpi ${k.cls}"><div class="v num">${esc(k.v)}</div><div class="l">${esc(k.l)}</div><div class="s">${esc(k.s)}</div></div>`).join('');
+
+  // Platform cards
+  const countBy = (platform) => posts.filter(p => p.platform === platform).length;
+  const topProfile = (platform, actor) => profiles.filter(p => p.platform === platform && p.actor === actor).sort((a,b)=>(b.followers||0)-(a.followers||0))[0];
+  const pc = [
+    { p:'Instagram', cls:'ig', main: ig('cjp')?.followers_label || '—', mainLabel:'CJP followers', rows:[
+      ['Congress', ig('congress')?.followers_label || '—'],
+      ['Neha Bora', igNeha?.followers_label || '—'],
+      ['AISA', igAisa?.followers_label || '—']
+    ], note:'4 profiles · post feed blocked' },
+    { p:'X', cls:'x', main: compact(topProfile('X','congress')?.followers), mainLabel:'Congress followers', rows:[
+      ['AISA', topProfile('X','aisa')?.followers_label || '—'],
+      ['CJP', 'n/e'],
+      ['Neha', 'n/e']
+    ], note:'5 profiles · 7 posts' },
+    { p:'Telegram', cls:'tg', main: tg?.followers_label || '—', mainLabel:'subscribers', rows:[
+      ['Messages', String(tgPosts.length)],
+      ['Total views', compact(tgViews)],
+      ['Range', '28 May – 6 Oct']
+    ], note:'Public channel preview' },
+    { p:'YouTube', cls:'yt', main: (yt('congress')?.followers_label || '—').replace(/ subscribers?/i,''), mainLabel:'Congress subscribers', rows:[
+      ['CJP', (yt('cjp')?.followers_label || '—').replace(/ subscribers?/i,'')],
+      ['AISA', (yt('aisa')?.followers_label || '—').replace(/ subscribers?/i,'')],
+      ['Videos', String(countBy('YouTube'))]
+    ], note:'3 channels · 45 videos' },
+    { p:'Facebook', cls:'fb', main:'2 pages', mainLabel:'reachable', rows:[
+      ['Congress', 'page found'],
+      ['AISA', 'page found'],
+      ['Metrics', 'not exposed']
+    ], note:'Follower counts login-walled' }
+  ];
+  $('platformCards').innerHTML = pc.map(c => `
+    <div class="platform-card">
+      <div class="pc-head"><span class="pc-icon ${c.cls}">${c.p.slice(0,2).toUpperCase()}</span><div><b>${c.p}</b><span>${c.note}</span></div></div>
+      <div class="pc-main num">${esc(c.main)} <small>${esc(c.mainLabel)}</small></div>
+      <div class="pc-rows">${c.rows.map(r=>`<div class="pc-row"><span>${r[0]}</span><b>${esc(r[1])}</b></div>`).join('')}</div>
+    </div>`).join('');
+
+  // Donut mix
+  const mix = [
+    { label:'Telegram', value: countBy('Telegram'), color:'#229ED9' },
+    { label:'YouTube', value: countBy('YouTube'), color:'#C4302B' },
+    { label:'X', value: countBy('X'), color:'#1F1E1B' }
+  ].filter(x=>x.value>0);
+  const totalMix = mix.reduce((s,x)=>s+x.value,0);
+  let acc = 0;
+  const segs = mix.map(x => { const from = acc/totalMix*100; acc += x.value; const to = acc/totalMix*100; return `${x.color} ${from}% ${to}%`; }).join(', ');
+  $('mixDonut').style.background = `conic-gradient(${segs})`;
+  $('mixTotal').textContent = totalMix;
+  $('mixLegend').innerHTML = mix.map(x => `<div class="row"><span class="sw" style="background:${x.color}"></span>${x.label}<b>${x.value}</b></div>`).join('');
+
+  // Telegram weekly
+  function weekStart(d){ const x = new Date(d); const day = (x.getUTCDay()+6)%7; x.setUTCDate(x.getUTCDate()-day); x.setUTCHours(0,0,0,0); return x; }
+  const weeks = new Map();
+  tgPosts.forEach(p => { const w = weekStart(p.published_at); const k = w.toISOString().slice(0,10); if(!weeks.has(k)) weeks.set(k,{date:w,count:0,views:0}); const o=weeks.get(k); o.count++; o.views += p.metrics?.views || 0; });
+  const weekArr = [...weeks.values()].sort((a,b)=>a.date-b.date);
+  const maxWeek = Math.max(...weekArr.map(w=>w.count),1);
+  let prevMonth = '';
+  const weeklyHtml = weekArr.map((w) => {
+    const month = w.date.toLocaleDateString('en-GB',{month:'short'});
+    const label = month !== prevMonth ? month : '';
+    prevMonth = month;
+    return `<div class="cb"><div class="tip">${w.date.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}: ${w.count} messages · ${compact(w.views)} views</div><div class="bar" style="height:${Math.max(3,(w.count/maxWeek)*100)}%"></div><div class="lab">${label}</div></div>`;
+  }).join('');
+  $('tgWeekly').innerHTML = weeklyHtml;
+  $('tgWeekly2').innerHTML = weeklyHtml;
+  $('tgWeeklyTotal').textContent = weekArr.length + ' weeks · peak ' + maxWeek + ' messages';
+
+  // Top Telegram
+  const topTg = tgPosts.slice().sort((a,b)=>(b.metrics?.views||0)-(a.metrics?.views||0)).slice(0,5);
+  const maxTgView = topTg[0]?.metrics?.views || 1;
+  $('topTg').innerHTML = topTg.map(p => `<div class="mini-item"><div><div class="mt">${esc(p.text.slice(0,170))}</div><div class="mm">${dtShort(p.published_at)} · <a href="${esc(p.url)}" target="_blank" rel="noopener">open</a></div></div><div class="mv">${compact(p.metrics?.views)}<span>views</span></div></div>`).join('');
+
+  // Top YouTube
+  const ytPosts = posts.filter(p=>p.platform==='YouTube');
+  const topYt = ytPosts.slice().sort((a,b)=>(b.metrics?.views||0)-(a.metrics?.views||0)).slice(0,5);
+  $('topYt').innerHTML = topYt.map(p => `<div class="mini-item"><div><div class="mt">${esc(p.text)}</div><div class="mm">${esc(p.account)} · ${dtShort(p.published_at)} · <a href="${esc(p.url)}" target="_blank" rel="noopener">watch</a></div></div><div class="mv">${compact(p.metrics?.views)}<span>views</span></div></div>`).join('');
+
+  // Latest activity
+  const latest = posts.filter(p=>p.platform!=='Telegram' || true).slice(0,6);
+  $('latestFeed').innerHTML = latest.map(p => `<div class="mini-item"><div><div class="mt">${esc((p.text||'').slice(0,150))}</div><div class="mm">${p.platform} · ${esc(p.account)} · ${dtShort(p.published_at)}</div></div><div class="mv">${p.metrics?.views!=null?compact(p.metrics.views):'—'}<span>${p.metrics?.views!=null?'views':''}</span></div></div>`).join('');
+
+  // Collection bars
+  const statuses = ['ok','partial','blocked','unavailable'];
+  const statusLabel = { ok:'OK', partial:'Partial', blocked:'Blocked', unavailable:'Unavailable' };
+  const statusColor = { ok:'#1E7B55', partial:'#8A5A00', blocked:'#B3261E', unavailable:'#6B665C' };
+  const statusCounts = Object.fromEntries(statuses.map(s=>[s,D.collection.filter(c=>c.status===s).length]));
+  $('collectionBars').innerHTML = statuses.map(s => `<div class="bar-row"><span class="bl">${statusLabel[s]}</span><div class="bar-track"><div class="bar-fill" style="width:${(statusCounts[s]/D.collection.length)*100}%;background:${statusColor[s]}"></div></div><span class="bv">${statusCounts[s]}</span></div>`).join('');
+  $('colOk').textContent = statusCounts.ok;
+  $('colPartial').textContent = statusCounts.partial;
+  $('colBlocked').textContent = statusCounts.blocked;
+  $('colUnavailable').textContent = statusCounts.unavailable;
+
+  // Profiles
+  function profileCard(p){
+    const label = p.platform === 'YouTube' ? (p.followers_label || '—').replace(/ subscribers?/i,'') : (p.followers_label || '—');
+    const postsLabel = p.posts_label || (p.posts!=null ? full(p.posts) : '—');
+    return `<div class="profile-card" id="profile-${esc(p.id)}">
+      <div class="pc-top">${pbadge(p.platform)}<span class="handle">${esc(p.account)}</span></div>
+      <div class="pc-stats">
+        <div class="pc-stat"><b class="num">${esc(label)}</b><span>${p.platform==='YouTube'?'subscribers':p.platform==='Telegram'?'subscribers':'followers'}</span></div>
+        <div class="pc-stat"><b class="num">${esc(postsLabel)}</b><span>${p.platform==='YouTube'?'videos fetched':'posts'}</span></div>
+        ${p.following!=null?`<div class="pc-stat"><b class="num">${full(p.following)}</b><span>following</span></div>`:''}
+      </div>
+      <div class="pc-bio">${esc(p.bio || p.note || '')}</div>
+      <div class="pc-links"><span>${p.status==='ok'?'public':p.status}</span><a href="${esc(p.url)}" target="_blank" rel="noopener">Open profile ↗</a></div>
+    </div>`;
+  }
+  $('igProfiles').innerHTML = profiles.filter(p=>p.platform==='Instagram').map(profileCard).join('');
+  $('xProfiles').innerHTML = profiles.filter(p=>p.platform==='X').map(profileCard).join('');
+  $('ytProfiles').innerHTML = profiles.filter(p=>p.platform==='YouTube').map(profileCard).join('');
+
+  // X feed
+  const xPosts = posts.filter(p=>p.platform==='X');
+  $('xFeed').innerHTML = xPosts.map(p => `
+    <article class="feed-item">
+      <div class="fi-top">${pbadge('X')}<span class="acct">${esc(p.account)}</span><time>${dt(p.published_at)}</time><a class="open" href="${esc(p.url)}" target="_blank" rel="noopener">Open ↗</a></div>
+      <div class="fi-text">${esc(p.text)}</div>
+      <div class="fi-metrics">${metricHtml(p)}</div>
+    </article>`).join('') || '<div class="empty">No X posts returned.</div>';
+
+  const xUndated = D.xUndated || [];
+  $('xUndated').innerHTML = xUndated.map(p => `
+    <article class="feed-item">
+      <div class="fi-top">${pbadge('X')}<span class="acct">${esc(p.account)}</span><time>date n/e</time><a class="open" href="${esc(p.url)}" target="_blank" rel="noopener">Open profile ↗</a></div>
+      <div class="fi-text">${esc(p.text)}</div>
+      <div class="fi-metrics"><span>${esc(p.note || 'Timestamp not exposed')}</span></div>
+    </article>`).join('') || '<div class="empty">No undated posts.</div>';
+
+  // Telegram stats
+  const tgMax = topTg[0];
+  $('tgStats').innerHTML = [
+    ['168K','subscribers'],
+    [String(tgPosts.length),'messages'],
+    [compact(tgViews),'total views'],
+    [compact(Math.round(tgViews/tgPosts.length)),'avg views / message'],
+    [compact(tgMax?.metrics?.views),'top message']
+  ].map(x=>`<div class="stat"><b class="num">${x[0]}</b><span>${x[1]}</span></div>`).join('');
+
+  // YouTube summary
+  const ytBy = {};
+  ytPosts.forEach(p => { (ytBy[p.account] ||= []).push(p); });
+  $('ytSummary').innerHTML = Object.entries(ytBy).map(([acct, arr]) => {
+    const views = arr.reduce((s,p)=>s+(p.metrics?.views||0),0);
+    const sorted = arr.slice().sort((a,b)=>(b.metrics?.views||0)-(a.metrics?.views||0));
+    const med = sorted[Math.floor(sorted.length/2)]?.metrics?.views || 0;
+    const top = sorted[0];
+    return `<tr><td><b>${esc(acct)}</b><span class="sub">${arr.length} videos</span></td><td class="num">${full(views)}</td><td class="num">${full(med)}</td><td>${esc((top?.text||'').slice(0,70))}<span class="sub">${compact(top?.metrics?.views)} views</span></td></tr>`;
+  }).join('');
+
+  // Other platforms
+  $('otherPlatforms').innerHTML = profiles.filter(p=>p.platform==='Facebook').map(p=>`<tr><td><b>${esc(p.platform)}</b><span class="sub">${esc(p.account)}</span></td><td>Page title and URL</td><td>Follower count, posts, engagement</td><td><span class="status partial">partial</span></td></tr>`).join('') + `
+    <tr><td><b>Reddit</b><span class="sub">r/CockroachJantaParty09</span></td><td>Nothing returned</td><td>All posts and comments</td><td><span class="status blocked">blocked 403</span></td></tr>
+    <tr><td><b>WhatsApp</b><span class="sub">Channel link</span></td><td>Nothing returned</td><td>All messages</td><td><span class="status unavailable">no public API</span></td></tr>`;
+
+  // Actor cards
+  const actorPostCount = { cjp: posts.filter(p=>p.actor==='cjp').length, congress: posts.filter(p=>p.actor==='congress').length, aisa: posts.filter(p=>p.actor==='aisa').length };
+  $('actorCards').innerHTML = D.actors.map(a => {
+    const igp = profiles.filter(p=>p.platform==='Instagram'&&p.actor===a.id);
+    const xp = profiles.filter(p=>p.platform==='X'&&p.actor===a.id);
+    const ytp = profiles.filter(p=>p.platform==='YouTube'&&p.actor===a.id);
+    const tgp = profiles.filter(p=>p.platform==='Telegram'&&p.actor===a.id)[0];
+    return `<div class="actor-card ${a.id}">
+      <div class="actor-band"></div>
+      <div class="actor-inner">
+        <h2>${esc(a.name)}</h2>
+        <div class="role">${esc(a.role)}</div>
+        <div class="note">${esc(a.note)}</div>
+        <div class="actor-rows">
+          ${igp.map(p=>`<div class="actor-row"><span>Instagram ${esc(p.account)}</span><b>${esc(p.followers_label||'n/e')}</b></div>`).join('')}
+          ${xp.map(p=>`<div class="actor-row"><span>X ${esc(p.account)}</span><b>${p.followers_label==='not exposed'?'n/e':esc(p.followers_label)}</b></div>`).join('')}
+          ${ytp.map(p=>`<div class="actor-row"><span>YouTube ${esc(p.account)}</span><b>${esc((p.followers_label||'n/e').replace(/ subscribers?/i,''))}</b></div>`).join('')}
+          ${tgp?`<div class="actor-row"><span>Telegram</span><b>${esc(tgp.followers_label)}</b></div>`:''}
+        </div>
+        <div class="actor-foot"><span>${actorPostCount[a.id]} fetched items</span><span>${xp.length} X ${xp.length === 1 ? 'profile' : 'profiles'}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Actor compare table
+  const cmp = [
+    ['Instagram followers', ig('cjp')?.followers_label, ig('congress')?.followers_label, `${igAisa?.followers_label || '—'} / ${igNeha?.followers_label || '—'}`],
+    ['Instagram posts', ig('cjp')?.posts_label || full(ig('cjp')?.posts), ig('congress')?.posts_label || full(ig('congress')?.posts), `${igAisa?.posts_label || full(igAisa?.posts)} / ${igNeha?.posts_label || full(igNeha?.posts)}`],
+    ['X followers', 'n/e', topProfile('X','congress')?.followers_label, topProfile('X','aisa')?.followers_label],
+    ['X posts (account total)', compact(profiles.find(p=>p.id==='x-cjp')?.posts), compact(profiles.find(p=>p.id==='x-congress')?.posts), compact(profiles.find(p=>p.id==='x-aisa')?.posts)],
+    ['YouTube subscribers', (yt('cjp')?.followers_label||'—').replace(/ subscribers?/i,''), (yt('congress')?.followers_label||'—').replace(/ subscribers?/i,''), (yt('aisa')?.followers_label||'—').replace(/ subscribers?/i,'')],
+    ['Telegram subscribers', tg?.followers_label, '—', '—'],
+    ['Fetched items', String(actorPostCount.cjp), String(actorPostCount.congress), String(actorPostCount.aisa)]
+  ];
+  $('actorCompare').innerHTML = cmp.map(r=>`<tr><td><b>${r[0]}</b></td><td class="num">${esc(r[1]||'—')}</td><td class="num">${esc(r[2]||'—')}</td><td class="num">${esc(r[3]||'—')}</td></tr>`).join('');
+
+  // Collection table
+  const colOrder = { ok:0, partial:1, blocked:2, unavailable:3 };
+  const col = D.collection.slice().sort((a,b)=>(colOrder[a.status]-colOrder[b.status])||a.platform.localeCompare(b.platform));
+  $('collectionTable').innerHTML = col.map(c=>`<tr><td><b>${esc(c.platform)}</b></td><td class="mono">${esc(c.endpoint)}</td><td><span class="status ${c.status}">${c.status}</span></td><td class="num">${c.records}</td><td>${esc(c.note)}</td></tr>`).join('');
+
+  // Feed
+  let feedPlatform = 'all', feedActor = 'all', feedLimit = 40, feedQuery = '', feedSort = 'new';
+  const platforms = ['all', ...new Set(posts.map(p=>p.platform))];
+  const actors = ['all', ...D.actors.map(a=>a.id)];
+  const platformLabel = { all:'All', Telegram:'Telegram', YouTube:'YouTube', X:'X' };
+  const actorLabel = { all:'All actors', cjp:'CJP', congress:'Congress', aisa:'AISA / Neha' };
+  function chipHtml(kind, value, label, count, active){
+    return `<button class="chip ${active?'active':''}" data-kind="${kind}" data-value="${value}" type="button">${label}<span class="n">${count}</span></button>`;
+  }
+  function renderChips(){
+    $('platformChips').innerHTML = platforms.map(p=>chipHtml('platform',p,platformLabel[p]||p, p==='all'?posts.length:posts.filter(x=>x.platform===p).length, feedPlatform===p)).join('');
+    $('actorChips').innerHTML = actors.map(a=>chipHtml('actor',a,actorLabel[a]||a, a==='all'?posts.length:posts.filter(x=>x.actor===a).length, feedActor===a)).join('');
+    document.querySelectorAll('#platformChips .chip, #actorChips .chip').forEach(btn=>{
+      btn.onclick = () => {
+        if(btn.dataset.kind==='platform') feedPlatform = btn.dataset.value;
+        else feedActor = btn.dataset.value;
+        feedLimit = 40; renderChips(); renderFeed();
+      };
+    });
+  }
+  function filtered(){
+    let out = posts.filter(p => (feedPlatform==='all'||p.platform===feedPlatform) && (feedActor==='all'||p.actor===feedActor));
+    if(feedQuery.trim()){
+      const q = feedQuery.toLowerCase();
+      out = out.filter(p => (p.text||'').toLowerCase().includes(q) || (p.account||'').toLowerCase().includes(q) || (p.platform||'').toLowerCase().includes(q));
+    }
+    out.sort((a,b)=>{
+      if(feedSort==='old') return new Date(a.published_at)-new Date(b.published_at);
+      if(feedSort==='views') return (b.metrics?.views||0)-(a.metrics?.views||0);
+      return new Date(b.published_at)-new Date(a.published_at);
+    });
+    return out;
+  }
+  function metricHtml(p){
+    const m = p.metrics || {};
+    const bits = [];
+    if(m.views!=null) bits.push(`<span><b>${compact(m.views)}</b> views</span>`);
+    if(m.likes!=null) bits.push(`<span><b>${compact(m.likes)}</b> likes</span>`);
+    if(m.replies!=null) bits.push(`<span><b>${compact(m.replies)}</b> replies</span>`);
+    if(m.reposts!=null) bits.push(`<span><b>${compact(m.reposts)}</b> reposts</span>`);
+    return bits.join('') || '<span>No public metrics returned</span>';
+  }
+  function feedCard(p){
+    const long = (p.text||'').length > 320;
+    return `<article class="feed-item" id="post-${esc(p.id)}">
+      <div class="fi-top">${pbadge(p.platform)}${actorDot(p.actor)}<span class="acct">${esc(p.account)}</span><time>${dt(p.published_at)}</time><a class="open" href="${esc(p.url)}" target="_blank" rel="noopener">Open ↗</a></div>
+      <div class="fi-text ${long?'clamp':''}">${esc(p.text||'')}</div>
+      ${long?`<button class="fi-more" type="button">Show more</button>`:''}
+      <div class="fi-metrics">${metricHtml(p)}</div>
+    </article>`;
+  }
+  function renderFeed(){
+    const list = filtered();
+    const slice = list.slice(0, feedLimit);
+    $('feedList').innerHTML = slice.map(feedCard).join('');
+    $('feedEmpty').hidden = list.length !== 0;
+    $('feedResultLine').textContent = `${list.length} matching items · ${slice.length} shown`;
+    $('loadMore').hidden = slice.length >= list.length;
+    document.querySelectorAll('.fi-more').forEach(btn=>{
+      btn.onclick = () => { const t = btn.previousElementSibling; t.classList.toggle('clamp'); btn.textContent = t.classList.contains('clamp') ? 'Show more' : 'Show less'; };
+    });
+  }
+  $('feedSearch').addEventListener('input', e=>{ feedQuery = e.target.value; feedLimit = 40; renderFeed(); });
+  $('feedSort').addEventListener('change', e=>{ feedSort = e.target.value; feedLimit = 40; renderFeed(); });
+  $('loadMore').addEventListener('click', ()=>{ feedLimit += 40; renderFeed(); });
+  renderChips(); renderFeed();
+
+  // Views
+  const views = ['overview','feed','platforms','actors','collection','method'];
+  const titles = { overview:'Overview', feed:'Feed', platforms:'Platforms', actors:'Actors', collection:'Collection log', method:'Method' };
+  function go(v){
+    if(!views.includes(v)) v = 'overview';
+    document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.id === 'view-'+v));
+    document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active', b.dataset.view === v));
+    $('topTitle').textContent = titles[v];
+    window.scrollTo({top:0,behavior:'auto'});
+    history.replaceState(null,'','#/'+v);
+  }
+  document.querySelectorAll('.nav').forEach(b=>{ b.addEventListener('click',()=>go(b.dataset.view)); });
+  const initial = (location.hash.match(/#\/([a-z]+)/)||[])[1];
+  go(initial || 'overview');
+
+  // Global search
+  const searchIndex = [
+    ...posts.map(p=>({type:'post', label:(p.text||'').slice(0,90), meta:`${p.platform} · ${p.account} · ${dtShort(p.published_at)}`, id:p.id, platform:p.platform})),
+    ...profiles.map(p=>({type:'profile', label:p.account, meta:`${p.platform} · ${p.followers_label||'n/e'}`, id:p.id, platform:p.platform}))
+  ];
+  const gs = $('globalSearch'), gr = $('searchResults');
+  function renderSearch(){
+    const q = gs.value.trim().toLowerCase();
+    if(!q){ gr.classList.remove('open'); gr.innerHTML=''; return; }
+    const hits = searchIndex.filter(x=>(x.label||'').toLowerCase().includes(q)||(x.meta||'').toLowerCase().includes(q)).slice(0,8);
+    gr.innerHTML = hits.map(x=>`<button class="sr-item" data-type="${x.type}" data-id="${esc(x.id)}" data-platform="${esc(x.platform)}"><span class="t">${esc(x.label||'—')}</span><span class="m">${esc(x.meta)}</span></button>`).join('') || '<div style="padding:10px 11px;font-size:11px;color:var(--muted)">No matching record.</div>';
+    gr.classList.add('open');
+    gr.querySelectorAll('.sr-item').forEach(b=>{
+      b.onclick = () => {
+        const type = b.dataset.type, id = b.dataset.id, platform = b.dataset.platform;
+        gr.classList.remove('open'); gs.value='';
+        if(type==='profile'){
+          go('platforms');
+          const el = document.getElementById('profile-'+id);
+          if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.outline='2px solid var(--accent)'; setTimeout(()=>el.style.outline='',1800); }
+        } else {
+          go('feed');
+          feedPlatform = platform; feedActor='all'; feedQuery=''; feedLimit=300;
+          document.querySelectorAll('#platformChips .chip, #actorChips .chip').forEach(c=>c.classList.remove('active'));
+          renderChips(); renderFeed();
+          const el = document.getElementById('post-'+id);
+          if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.outline='2px solid var(--accent)'; setTimeout(()=>el.style.outline='',1800); }
+        }
+      };
+    });
+  }
+  gs.addEventListener('input', renderSearch);
+  gs.addEventListener('focus', renderSearch);
+  document.addEventListener('click', e=>{ if(!e.target.closest('.top-search')) gr.classList.remove('open'); });
+  document.addEventListener('keydown', e=>{
+    if(e.key==='/' && document.activeElement !== gs){ e.preventDefault(); gs.focus(); }
+    if(e.key==='Escape'){ gr.classList.remove('open'); gs.blur(); }
+  });
+})();
+</script>
+</body>
+</html>
+
+
